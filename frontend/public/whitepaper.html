@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BitLease Whitepaper - Bitcoin-Backed Asset Leasing Protocol</title>
+    <meta name="description" content="BitLease whitepaper: Turn your Bitcoin into productive capital for real-world asset leasing while earning 5.5% APY">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🟠</text></svg>">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .whitepaper {
+            background: white;
+            margin: 40px auto;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 60px 0;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header .subtitle {
+            font-size: 1.5rem;
+            opacity: 0.9;
+            margin-bottom: 30px;
+            font-weight: 300;
+        }
+
+        .header .tagline {
+            font-size: 1.2rem;
+            background: rgba(255,255,255,0.2);
+            padding: 15px 30px;
+            border-radius: 50px;
+            display: inline-block;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav {
+            background: #fff;
+            padding: 20px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid #eee;
+        }
+
+        .nav-links {
+            display: flex;
+            justify-content: center;
+            list-style: none;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #666;
+            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            background: #f0f0f0;
+            color: #f5576c;
+        }
+
+        .content {
+            padding: 60px;
+        }
+
+        .section {
+            margin-bottom: 80px;
+        }
+
+        .section h2 {
+            font-size: 2.5rem;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            position: relative;
+            padding-left: 20px;
+        }
+
+        .section h2::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 5px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border-radius: 3px;
+        }
+
+        .section h3 {
+            font-size: 1.8rem;
+            color: #34495e;
+            margin: 40px 0 20px 0;
+            font-weight: 600;
+        }
+
+        .section h4 {
+            font-size: 1.3rem;
+            color: #555;
+            margin: 30px 0 15px 0;
+            font-weight: 600;
+        }
+
+        .section p {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            margin-bottom: 20px;
+            color: #555;
+        }
+
+        .highlight {
+            background: linear-gradient(120deg, #f093fb20 0%, #f5576c20 100%);
+            padding: 30px;
+            border-radius: 15px;
+            border-left: 5px solid #f5576c;
+            margin: 30px 0;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin: 40px 0;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .stat-card h3 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: white;
+        }
+
+        .stat-card p {
+            color: rgba(255,255,255,0.9);
+            font-size: 1rem;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            margin: 30px 0;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        th {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 20px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .phases-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin: 40px 0;
+        }
+
+        .phase-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .phase-card:hover {
+            border-color: #f5576c;
+            transform: translateY(-5px);
+        }
+
+        .phase-card h3 {
+            color: #f5576c;
+            margin-bottom: 15px;
+        }
+
+        .phase-card .timeline {
+            background: #f8f9fa;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .architecture-diagram {
+            background: linear-gradient(135deg, #667eea10 0%, #764ba210 100%);
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+            margin: 40px 0;
+            border: 2px dashed #667eea;
+        }
+
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 30px;
+            border-radius: 10px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin: 40px 0;
+        }
+
+        .benefit-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #f5576c;
+        }
+
+        .benefit-icon {
+            font-size: 2rem;
+        }
+
+        .footer {
+            background: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 40px 0;
+        }
+
+        .footer a {
+            color: #f5576c;
+            text-decoration: none;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.5rem;
+            }
+            
+            .content {
+                padding: 30px;
+            }
+            
+            .nav-links {
+                gap: 20px;
+            }
+            
+            .section h2 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="whitepaper">
+        <header class="header">
+            <div class="container">
+                <h1>🟠 BitLease</h1>
+                <div class="subtitle">Bitcoin-Backed Asset Leasing Protocol</div>
+                <div class="tagline">Turn your Bitcoin into productive capital while earning 5.5% APY</div>
+            </div>
+        </header>
+
+        <nav class="nav">
+            <div class="container">
+                <ul class="nav-links">
+                    <li><a href="#overview">Overview</a></li>
+                    <li><a href="#phases">Roadmap</a></li>
+                    <li><a href="#architecture">Architecture</a></li>
+                    <li><a href="#business">Business Model</a></li>
+                    <li><a href="#tokenomics">Tokenomics</a></li>
+                    <li><a href="#risks">Risk Management</a></li>
+                </ul>
+            </div>
+        </nav>
+
+        <div class="content">
+            <section id="overview" class="section">
+                <h2>🎯 Investment Thesis</h2>
+                
+                <div class="highlight">
+                    <p><strong>BitLease</strong> turns idle Bitcoin into productive capital for real-world asset leasing. Users collateralize staked Bitcoin (bBTC) to access GPU compute, storage, vehicles, and real estate while continuing to earn 5.5% APY on their Bitcoin holdings.</p>
+                </div>
+
+                <h3>Market Opportunity</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>$444B</h3>
+                        <p>Global asset leasing market</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>$147M</h3>
+                        <p>Idle BTC on CoreDAO</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>0.1%</h3>
+                        <p>Take rate = $735M ARR</p>
+                    </div>
+                </div>
+
+                <h3>Unique Value Proposition</h3>
+                <p><strong>Non-custodial Bitcoin financing:</strong> Users retain Bitcoin ownership while accessing liquidity for real-world assets. Zero disposal events mean no capital gains tax implications.</p>
+                <p><strong>Continuous yield generation:</strong> Bitcoin continues earning 5.5% APY through CoreDAO staking while serving as collateral.</p>
+                <p><strong>Real-world utility:</strong> Unlike traditional DeFi lending, BitLease enables access to physical assets with immediate economic value.</p>
+            </section>
+
+            <section id="core-flow" class="section">
+                <h2>🔄 Core Flow Mechanics</h2>
+                
+                <h3>Actor Map</h3>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Actor</th>
+                                <th>Role</th>
+                                <th>Platform</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Alice (User)</td>
+                                <td>End user</td>
+                                <td>MetaMask on CoreDAO</td>
+                            </tr>
+                            <tr>
+                                <td>Bitcoin Network</td>
+                                <td>BTC timelock</td>
+                                <td>CLTV script</td>
+                            </tr>
+                            <tr>
+                                <td>CoreDAO Network</td>
+                                <td>Mint bBTC + lending</td>
+                                <td>Smart contracts</td>
+                            </tr>
+                            <tr>
+                                <td>Asset Provider</td>
+                                <td>GPU/vehicle service</td>
+                                <td>Render/Akash/Tesla</td>
+                            </tr>
+                            <tr>
+                                <td>USDC Lenders</td>
+                                <td>Supply liquidity</td>
+                                <td>Lending pool</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>Step-by-Step Process</h3>
+                
+                <h4>Step 1: Bitcoin Staking (Non-custodial)</h4>
+                <p>Alice visits <strong>stake.coredao.org</strong> and locks 0.1 BTC via CLTV timelock on Bitcoin mainnet. She retains private keys while Bitcoin is timelocked for 6 months.</p>
+                <div class="code-block">
+# Bitcoin CLTV Script
+OP_IF
+  &lt;Alice_pub_key&gt; OP_CHECKSIG
+OP_ELSE
+  &lt;lock_time&gt; OP_CHECKLOCKTIMEVERIFY OP_DROP
+  &lt;CoreDAO_federation_pub_key&gt; OP_CHECKSIG
+OP_ENDIF
+                </div>
+
+                <h4>Step 2: bBTC Minting</h4>
+                <p>CoreDAO protocol detects the Bitcoin timelock transaction and mints 0.1 bBTC to Alice's CoreDAO address. This is an ERC-20 receipt token representing her staked Bitcoin plus accrued CORE rewards.</p>
+                <div class="code-block">
+// bBTC.sol (ERC-4626 vault)
+function mint(bytes32 btcTxHash, uint256 amount) external {
+    require(verifyBitcoinTx(btcTxHash, amount), "Invalid BTC tx");
+    _mint(msg.sender, amount);
+}
+                </div>
+
+                <h4>Step 3: Asset Leasing</h4>
+                <p>Alice visits <strong>bitlease.xyz</strong> and selects "24h A100 GPU - $60". The platform locks her 0.1 bBTC as collateral and provides $60 USDC at 50% LTV ratio.</p>
+                <div class="code-block">
+// LendingPool.sol
+function borrow(uint256 usdcAmount, address asset) external {
+    uint256 collateralNeeded = (usdcAmount * 1e18) / (btcPrice * LTV);
+    IERC20(bBTC).transferFrom(msg.sender, address(this), collateralNeeded);
+    IERC20(USDC).transfer(msg.sender, usdcAmount);
+}
+                </div>
+
+                <h4>Step 4: Provider Payment</h4>
+                <p>BitLease backend converts USDC to USD and pays the GPU provider (Render Network) via traditional payment rails. Alice receives SSH access credentials and begins using the GPU.</p>
+
+                <h4>Step 5: Loan Repayment</h4>
+                <p>After using the GPU, Alice repays $60.60 USDC (including 1% origination fee) to unlock her bBTC collateral. Her bBTC has grown to 0.10042 due to CORE staking rewards earned during the lease period.</p>
+
+                <h3>Financial Flow Summary</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>$0 Tax</h3>
+                        <p>No disposal event</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>5.5% APY</h3>
+                        <p>Continues earning</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>$0.60</h3>
+                        <p>Fee (1% origination)</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>+0.00042</h3>
+                        <p>BTC rewards earned</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="phases" class="section">
+                <h2>📋 5-Phase Expansion Roadmap</h2>
+                
+                <div class="phases-grid">
+                    <div class="phase-card">
+                        <h3>🔹 Phase 1: GPU Compute Leasing</h3>
+                        <div class="timeline">Months 0-3</div>
+                        <p><strong>Asset:</strong> A100/V100/H100 GPU hours</p>
+                        <p><strong>Providers:</strong> Render Network, Akash, Vast.ai</p>
+                        <p><strong>Users:</strong> AI startups, ML researchers</p>
+                        <p><strong>Revenue:</strong> 1% origination + 8% APR + 2% commission</p>
+                    </div>
+
+                    <div class="phase-card">
+                        <h3>🔹 Phase 2: Cloud Storage</h3>
+                        <div class="timeline">Months 4-6</div>
+                        <p><strong>Asset:</strong> Decentralized storage (TB/month)</p>
+                        <p><strong>Providers:</strong> Filecoin, Storj, Arweave</p>
+                        <p><strong>Users:</strong> NFT projects, dApp developers</p>
+                        <p><strong>Revenue:</strong> 15% markup + retrieval fees</p>
+                    </div>
+
+                    <div class="phase-card">
+                        <h3>🔹 Phase 3: EV Charging</h3>
+                        <div class="timeline">Months 7-9</div>
+                        <p><strong>Asset:</strong> Electric vehicle charging (kWh)</p>
+                        <p><strong>Providers:</strong> ChargePoint, EVgo, Tesla</p>
+                        <p><strong>Users:</strong> EV owners, fleet operators</p>
+                        <p><strong>Revenue:</strong> 10% markup + network fees</p>
+                    </div>
+
+                    <div class="phase-card">
+                        <h3>🔹 Phase 4: Physical Assets</h3>
+                        <div class="timeline">Months 10-15</div>
+                        <p><strong>Asset:</strong> Vehicles, construction equipment</p>
+                        <p><strong>Providers:</strong> Turo, United Rentals</p>
+                        <p><strong>Users:</strong> Contractors, small businesses</p>
+                        <p><strong>Revenue:</strong> 5-10% rental fees + insurance</p>
+                    </div>
+
+                    <div class="phase-card">
+                        <h3>🔹 Phase 5: Real Estate</h3>
+                        <div class="timeline">Months 16-24</div>
+                        <p><strong>Asset:</strong> Commercial properties, facilities</p>
+                        <p><strong>Providers:</strong> WeWork, property managers</p>
+                        <p><strong>Users:</strong> Startups, manufacturers</p>
+                        <p><strong>Revenue:</strong> 8-12% management + legal fees</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="architecture" class="section">
+                <h2>🏗️ Technical Architecture</h2>
+                
+                <div class="architecture-diagram">
+                    <h3>Protocol Flow</h3>
+                    <pre style="font-family: monospace; font-size: 1.1rem; margin: 20px 0; text-align: left;">
+┌──────────────┐    ┌──────────────┐    ┌──────────────┐
+│  Bitcoin     │───▶│  CoreDAO     │───▶│   BitLease   │
+│  Mainnet     │    │   Staking    │    │   Protocol   │
+│              │    │              │    │              │
+│ CLTV Lock    │    │ bBTC Mint    │    │ Asset Lease  │
+└──────────────┘    └──────────────┘    └──────────────┘
+                    </pre>
+                </div>
+
+                <h3>Core Smart Contracts</h3>
+                <div class="code-block">
+contracts/
+├── bBTC.sol              # ERC-4626 staked BTC vault
+├── LendingPool.sol       # USDC lending (Aave fork)
+├── LeaseManager.sol      # Asset lease creation
+├── UniversalOracle.sol   # Multi-asset pricing
+└── LiquidationEngine.sol # Auto-liquidation at 75% LTV
+                </div>
+
+                <h3>Frontend Structure</h3>
+                <div class="code-block">
+frontend/
+├── app/
+│   ├── stake/           # bBTC minting interface
+│   ├── lease/           # Asset leasing interface  
+│   └── dashboard/       # Portfolio overview
+├── components/
+│   ├── StakingInterface.tsx
+│   ├── GPULeasingInterface.tsx
+│   └── Dashboard.tsx
+└── lib/
+    ├── contracts/       # ABIs and addresses
+    └── hooks/          # Wagmi hooks
+                </div>
+
+                <h3>Smart Contract Addresses</h3>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Contract</th>
+                                <th>Purpose</th>
+                                <th>Network</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>bBTC.sol</strong></td>
+                                <td>ERC4626 vault for staked Bitcoin</td>
+                                <td>CoreDAO Testnet</td>
+                            </tr>
+                            <tr>
+                                <td><strong>LendingPool.sol</strong></td>
+                                <td>USDC lending against bBTC collateral</td>
+                                <td>CoreDAO Testnet</td>
+                            </tr>
+                            <tr>
+                                <td><strong>LeaseManager.sol</strong></td>
+                                <td>Manages asset leases and payments</td>
+                                <td>CoreDAO Testnet</td>
+                            </tr>
+                            <tr>
+                                <td><strong>UniversalOracle.sol</strong></td>
+                                <td>Real-time pricing via Chainlink</td>
+                                <td>CoreDAO Testnet</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="staking-mechanics" class="section">
+                <h2>⚙️ Bitcoin Staking Mechanics</h2>
+
+                <h3>Core Reward Distribution</h3>
+                <p><strong>CORE token emission:</strong> CoreDAO follows an 81-year emission schedule with 2.1B total CORE tokens. Daily emission is approximately 28,800 CORE tokens, decaying 3.6% annually.</p>
+                
+                <div class="highlight">
+                    <h4>Reward Calculation Formula</h4>
+                    <div class="code-block">
+User BTC Weight = BTC_locked / total_BTC_locked
+User Reward/Day = daily_emission × user_BTC_weight
+APR = (daily_CORE × 365 × CORE_price) / (BTC_locked × BTC_price)
+
+Example (current numbers):
+- Total BTC locked: 5,250 BTC
+- Alice locks: 0.1 BTC  
+- Alice share: 0.1 / 5,250 = 0.00001905
+- Daily CORE: 28,800 × 0.00001905 = 0.548 CORE/day
+- USD value: 0.548 × $2.05 ≈ $1.12/day → 5.5% APR
+                    </div>
+                </div>
+
+                <h3>bBTC Price Dynamics</h3>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Component</th>
+                                <th>Mechanism</th>
+                                <th>Impact</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Initial Ratio</td>
+                                <td>1 BTC locked → 1 bBTC minted</td>
+                                <td>Fixed at minting</td>
+                            </tr>
+                            <tr>
+                                <td>Reward Accrual</td>
+                                <td>CORE rewards added to vault</td>
+                                <td>bBTC price increases</td>
+                            </tr>
+                            <tr>
+                                <td>Auto-compounding</td>
+                                <td>Rewards compound every block</td>
+                                <td>Continuous growth</td>
+                            </tr>
+                            <tr>
+                                <td>Redemption</td>
+                                <td>bBTC → original BTC + rewards</td>
+                                <td>User keeps all yield</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>Claiming vs Non-Claiming</h3>
+                <p><strong>Default behavior:</strong> CORE rewards automatically compound into bBTC balance every block. Users don't need to claim manually.</p>
+                <p><strong>Manual claiming:</strong> Users can visit stake.coredao.org to claim rewards separately, but this doesn't affect bBTC balance calculation.</p>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Auto-Compound</h3>
+                        <p>Rewards add to bBTC value</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>No Expiry</h3>
+                        <p>Unclaimed rewards safe</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>$0.01</h3>
+                        <p>Gas fee to claim manually</p>
+                    </div>
+                </div>
+
+                <h3>Live Example: 30-Day Cycle</h3>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Action</th>
+                                <th>Alice Sees</th>
+                                <th>On-chain Value</th>
+                                <th>CORE Rewards</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Day 0: Lock 0.1 BTC</td>
+                                <td>0.1 bBTC</td>
+                                <td>0.10000 bBTC</td>
+                                <td>0 CORE</td>
+                            </tr>
+                            <tr>
+                                <td>Day 30: Auto-compound</td>
+                                <td>0.10042 bBTC</td>
+                                <td>+0.00042 BTC value</td>
+                                <td>16.44 CORE earned</td>
+                            </tr>
+                            <tr>
+                                <td>Lease GPU ($60)</td>
+                                <td>Lock bBTC collateral</td>
+                                <td>Borrow $60 USDC</td>
+                                <td>Rewards continue</td>
+                            </tr>
+                            <tr>
+                                <td>Repay loan</td>
+                                <td>Pay $60.60 USDC</td>
+                                <td>Unlock 0.10042 bBTC</td>
+                                <td>Keep all rewards</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="business" class="section">
+                <h2>💰 Revenue Model & Investment Case</h2>
+
+                <h3>Why BitLease vs "Routine Lending"</h3>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Traditional DeFi Lending</th>
+                                <th>BitLease Protocol</th>
+                                <th>Investor Impact</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Lend BTC → get USDC</td>
+                                <td>Lease Tesla with BTC that earns 5.5%</td>
+                                <td>Real-world utility = $444B TAM</td>
+                            </tr>
+                            <tr>
+                                <td>Custodial (WBTC on Ethereum)</td>
+                                <td>Non-custodial (CLTV on Bitcoin)</td>
+                                <td>Security moat</td>
+                            </tr>
+                            <tr>
+                                <td>Yield stops when deposited</td>
+                                <td>5.5% APY continues while collateral</td>
+                                <td>Continuous revenue</td>
+                            </tr>
+                            <tr>
+                                <td>Capital gains tax on disposal</td>
+                                <td>Zero tax (loan against BTC)</td>
+                                <td>User acquisition advantage</td>
+                            </tr>
+                            <tr>
+                                <td>100+ Ethereum forks</td>
+                                <td>Only possible on CoreDAO</td>
+                                <td>Impossible to replicate</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>Revenue Streams</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>1%</h3>
+                        <p>Origination fee per loan</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>3%</h3>
+                        <p>Interest spread (8% - 5%)</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>0.2%</h3>
+                        <p>Take rate on asset value</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>70%</h3>
+                        <p>EBITDA margin (software)</p>
+                    </div>
+                </div>
+
+                <h3>Market Size & Expansion</h3>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Phase</th>
+                                <th>Asset Class</th>
+                                <th>Market Size</th>
+                                <th>Annual Revenue @ 0.1%</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td>GPU Compute</td>
+                                <td>$15B</td>
+                                <td>$150M</td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td>Cloud Storage</td>
+                                <td>$8B</td>
+                                <td>$80M</td>
+                            </tr>
+                            <tr>
+                                <td>3</td>
+                                <td>EV Charging</td>
+                                <td>$12B</td>
+                                <td>$120M</td>
+                            </tr>
+                            <tr>
+                                <td>4</td>
+                                <td>Vehicle Rental</td>
+                                <td>$120B</td>
+                                <td>$1.2B</td>
+                            </tr>
+                            <tr>
+                                <td>5</td>
+                                <td>Real Estate</td>
+                                <td>$289B</td>
+                                <td>$2.9B</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="highlight">
+                    <h4>Exit Valuation Model</h4>
+                    <p><strong>Year 3:</strong> $735M revenue × 10× multiple = $7.3B enterprise value</p>
+                    <p><strong>Year 5:</strong> $4.5B revenue × 12× multiple = $54B enterprise value</p>
+                    <p><em>Comparable: Stripe raised at 12× revenue during expansion phase</em></p>
+                </div>
+            </section>
+
+            <section id="tokenomics" class="section">
+                <h2>🪙 Token Economics (BTL)</h2>
+
+                <div class="highlight">
+                    <h3>Total Supply: 1 Billion BTL Tokens</h3>
+                </div>
+
+                <h3>Token Allocation</h3>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Allocation</th>
+                                <th>Percentage</th>
+                                <th>Purpose</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Community Airdrop</td>
+                                <td>40%</td>
+                                <td>BTC stakers & early users</td>
+                            </tr>
+                            <tr>
+                                <td>Team & Advisors</td>
+                                <td>20%</td>
+                                <td>4-year vesting schedule</td>
+                            </tr>
+                            <tr>
+                                <td>CoreDAO Grant Match</td>
+                                <td>20%</td>
+                                <td>Ecosystem alignment</td>
+                            </tr>
+                            <tr>
+                                <td>DAO Treasury</td>
+                                <td>20%</td>
+                                <td>Governance & development</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>Fee Distribution</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>70%</h3>
+                        <p>Distributed to lenders</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>20%</h3>
+                        <p>BTL token buyback</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>10%</h3>
+                        <p>DAO treasury</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="risks" class="section">
+                <h2>🛡️ Risk Management</h2>
+
+                <h3>Key Risks & Mitigations</h3>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Risk</th>
+                                <th>Mitigation</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>BTC volatility</td>
+                                <td>50% LTV + 75% liquidation threshold</td>
+                            </tr>
+                            <tr>
+                                <td>Provider failure</td>
+                                <td>Multi-provider integration</td>
+                            </tr>
+                            <tr>
+                                <td>Smart contract bugs</td>
+                                <td>Audits + formal verification</td>
+                            </tr>
+                            <tr>
+                                <td>Regulatory changes</td>
+                                <td>Jurisdiction flexibility + compliance</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="highlight">
+                    <h4>Security Features</h4>
+                    <ul style="margin-left: 20px; line-height: 2;">
+                        <li><strong>Non-custodial:</strong> Bitcoin locked via CLTV timelock</li>
+                        <li><strong>Automated liquidation:</strong> 75% LTV threshold protection</li>
+                        <li><strong>Multi-signature:</strong> Treasury and critical functions</li>
+                        <li><strong>Formal verification:</strong> Critical smart contract logic</li>
+                    </ul>
+                </div>
+            </section>
+
+
+            <section class="section">
+                <h2>🚀 Go-to-Market Strategy</h2>
+                
+                <div class="benefits-grid">
+                    <div class="benefit-item">
+                        <div class="benefit-icon">🎯</div>
+                        <div>
+                            <strong>Phase 1 Launch</strong><br>
+                            Target AI/ML startups with 50% GPU cost savings
+                        </div>
+                    </div>
+                    <div class="benefit-item">
+                        <div class="benefit-icon">📈</div>
+                        <div>
+                            <strong>User Acquisition</strong><br>
+                            Bitcoin communities, CoreDAO ecosystem
+                        </div>
+                    </div>
+                    <div class="benefit-item">
+                        <div class="benefit-icon">🤝</div>
+                        <div>
+                            <strong>Strategic Partnerships</strong><br>
+                            GPU providers, institutional Bitcoin holders
+                        </div>
+                    </div>
+                    <div class="benefit-item">
+                        <div class="benefit-icon">🔒</div>
+                        <div>
+                            <strong>Security Audits</strong><br>
+                            Professional security reviews before mainnet
+                        </div>
+                    </div>
+                    <div class="benefit-item">
+                        <div class="benefit-icon">🌐</div>
+                        <div>
+                            <strong>Global Expansion</strong><br>
+                            Multi-chain deployment and asset diversification
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+        </div>
+
+        <footer class="footer">
+            <div class="container">
+                <p><strong>BitLease</strong> - Built with ❤️ on CoreDAO</p>
+                <p><em>The first protocol to turn idle Bitcoin into productive capital for real-world asset leasing.</em></p>
+                <p>
+                    <a href="https://github.com/your-username/bitlease" target="_blank">GitHub</a> • 
+                    <a href="https://coredao.org" target="_blank">CoreDAO</a> • 
+                    <a href="mailto:support@bitlease.xyz">Contact</a>
+                </p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetSection = document.querySelector(targetId);
+                if (targetSection) {
+                    targetSection.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Highlight current section in navigation
+        window.addEventListener('scroll', function() {
+            const sections = document.querySelectorAll('.section');
+            const navLinks = document.querySelectorAll('.nav-links a');
+            
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (pageYOffset >= sectionTop - 200) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.style.background = '';
+                link.style.color = '';
+                if (link.getAttribute('href') === '#' + current) {
+                    link.style.background = '#f0f0f0';
+                    link.style.color = '#f5576c';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

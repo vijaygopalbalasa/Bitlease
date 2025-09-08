@@ -1,0 +1,112 @@
+@import "tailwindcss";
+
+/* App base styles */
+:root { color-scheme: light; }
+html, body { height: 100%; }
+body {
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+}
+
+/* Override Reown/WalletConnect styles and fonts */
+w3m-modal,
+w3m-modal *,
+appkit-modal,
+appkit-modal *,
+w3m-button,
+w3m-button *,
+appkit-button,
+appkit-button *,
+w3m-router-container,
+w3m-router-container *,
+w3m-wallet-button,
+w3m-wallet-button *,
+[data-testid*="w3m"],
+[data-testid*="w3m"] * {
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+}
+
+/* Style the AppKit connect button */
+appkit-button {
+  --w3m-accent: rgb(249 115 22) !important; /* orange-500 */
+  --w3m-color-mix: rgb(249 115 22) !important;
+  --w3m-color-mix-strength: 40 !important;
+  --w3m-border-radius-master: 12px !important;
+  --w3m-border-radius-xs: 8px !important;
+  --w3m-border-radius-s: 12px !important;
+  --w3m-border-radius-m: 16px !important;
+}
+
+appkit-button button,
+appkit-button [role="button"] {
+  min-height: 44px !important;
+  padding: 12px 24px !important;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  background: linear-gradient(135deg, rgb(249 115 22), rgb(234 88 12)) !important;
+  border: 2px solid rgba(249, 115, 22, 0.3) !important;
+  border-radius: 12px !important;
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  letter-spacing: 0.025em !important;
+}
+
+appkit-button button:hover,
+appkit-button [role="button"]:hover {
+  background: linear-gradient(135deg, rgb(234 88 12), rgb(194 65 12)) !important;
+  border-color: rgba(234, 88, 12, 0.5) !important;
+  box-shadow: 0 6px 20px rgba(249, 115, 22, 0.4) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* Connected state styling */
+appkit-button[data-state="connected"] button,
+appkit-button[data-state="connected"] [role="button"] {
+  background: linear-gradient(135deg, rgb(34 197 94), rgb(22 163 74)) !important;
+  border-color: rgba(34, 197, 94, 0.3) !important;
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3) !important;
+}
+
+appkit-button[data-state="connected"] button:hover,
+appkit-button[data-state="connected"] [role="button"]:hover {
+  background: linear-gradient(135deg, rgb(22 163 74), rgb(21 128 61)) !important;
+  border-color: rgba(22, 163, 74, 0.5) !important;
+  box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4) !important;
+}
+
+/* Override specific font variables */
+:root {
+  --w3m-font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+}
+
+/* Prevent font loading from external sources by redirecting to local fonts */
+@font-face {
+  font-family: 'KHTeka-Regular';
+  src: local('system-ui'), local('-apple-system'), local('Segoe UI'), local('Roboto'), local('Arial');
+  font-display: block;
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: 'KHTeka-Medium';
+  src: local('system-ui'), local('-apple-system'), local('Segoe UI'), local('Roboto'), local('Arial');
+  font-display: block;
+  font-weight: 500;
+}
+
+/* Block external font loading entirely */
+@font-face {
+  font-family: 'KHTeka';
+  src: local('system-ui'), local('-apple-system'), local('Segoe UI');
+  font-display: block;
+}
+
+/* Hide and block font preload links */
+link[href*="fonts.reown.com"] {
+  display: none !important;
+}
+
+/* Disable font loading errors */
+* {
+  font-feature-settings: normal !important;
+}

@@ -1,0 +1,31 @@
+{
+  "network": "core-testnet-1114",
+  "chainId": 1114,
+  "rpcUrl": "https://rpc.test2.btcs.network",
+  "contracts": {
+    "bBTC": "0x2dA6DDf5FD109d8308e10D1a19a05a12e8db48Ca",
+    "BTCPriceOracle": "0x41b9e12589ADA499b9c7dc85eFC40922bCD3A69d",
+    "GPUOracle": "0xCC42924Bc04e1AdF4E035F6ce81ed8fa7a797F67",
+    "LendingPool": "0x71c93c28DB4755802456B080CaF357da7b73f79c",
+    "LeaseManager": "0xfd2a1Fa3Fc8026aBCd7444e6F1824b95c4F15b94",
+    "WBTC": "0xdBDec8c688eF8d16C97568fBF40Fca560438EC59",
+    "USDC": "0xc911d344C12B611E1B160a9916B2a29b12f81eDc"
+  },
+  "deployer": "0x1C8cd0c38F8DE35d6056c7C7aBFa7e65D260E816",
+  "treasury": "0x1C8cd0c38F8DE35d6056c7C7aBFa7e65D260E816",
+  "timestamp": "2025-09-01T16:26:31.630Z",
+  "configuration": {
+    "initialBTCPrice": "65000",
+    "initialLiquidity": "100000",
+    "platformFee": "2.5%",
+    "loanToValue": "50%",
+    "liquidationThreshold": "75%"
+  },
+  "abi": {
+    "bBTC": "contracts/bBTC.sol",
+    "LendingPool": "contracts/LendingPool.sol",
+    "LeaseManager": "contracts/LeaseManager.sol",
+    "GPUOracle": "contracts/GPUOracle.sol",
+    "BTCPriceOracle": "contracts/BTCPriceOracle.sol"
+  }
+}

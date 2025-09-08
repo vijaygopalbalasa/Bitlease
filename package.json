@@ -1,0 +1,37 @@
+{
+  "name": "bitlease",
+  "version": "1.0.0",
+  "description": "BitLease - GPU leasing platform using Bitcoin staking collateral",
+  "main": "index.js",
+  "scripts": {
+    "build": "hardhat compile",
+    "test": "hardhat test",
+    "deploy": "hardhat run scripts/deploy.js",
+    "deploy:testnet": "hardhat run scripts/deploy.js --network core_testnet",
+    "verify": "hardhat verify --network core_testnet",
+    "dev": "cd frontend && npm run dev",
+    "start:backend": "hardhat node",
+    "start:frontend": "cd frontend && npm start"
+  },
+  "keywords": [
+    "bitcoin",
+    "gpu",
+    "leasing",
+    "defi",
+    "core-dao",
+    "blockchain"
+  ],
+  "author": "BitLease Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^3.0.2",
+    "@openzeppelin/contracts": "^5.0.0",
+    "hardhat": "^2.17.0",
+    "chai": "^4.3.7",
+    "ethers": "^6.7.0"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.0.0",
+    "ethers": "^6.7.0"
+  }
+}
