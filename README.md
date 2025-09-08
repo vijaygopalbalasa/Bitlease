@@ -103,8 +103,8 @@ BitLease enables a **3-step process** to lease real-world assets:
 ## 🌐 Network Configuration
 
 ### CoreDAO Testnet
-- **RPC**: `https://rpc.test.btcs.network`
-- **Chain ID**: `1115`
+- **RPC**: `https://rpc.test2.btcs.network`
+- **Chain ID**: `1114`
 - **Faucet**: [https://scan.test.btcs.network/faucet](https://scan.test.btcs.network/faucet)
 - **Explorer**: [https://scan.test.btcs.network](https://scan.test.btcs.network)
 
@@ -156,11 +156,11 @@ cd frontend && npx tsc --noEmit
 
 | Phase | Timeline | Assets | Status |
 |-------|----------|--------|--------|
-| **Phase 1** | ✅ Q4 2024 | GPU Compute (A100, V100, H100) | **Live** |
-| **Phase 2** | 🚧 Q1 2025 | Cloud Storage (Filecoin, Arweave) | In Development |
-| **Phase 3** | 📋 Q2 2025 | EV Charging Credits | Planned |
-| **Phase 4** | 📋 Q3 2025 | Cars & Equipment Leasing | Planned |
-| **Phase 5** | 📋 Q4 2025 | Real Estate & Solar | Planned |
+| **Phase 1** | ✅ Q4 2025 | GPU Compute (A100, V100, H100) | **In Development** |
+| **Phase 2** | 🚧 Q1 2026 | Cloud Storage (Filecoin, Arweave) | In Development |
+| **Phase 3** | 📋 Q2 2026 | EV Charging Credits | Planned |
+| **Phase 4** | 📋 Q3 2026 | Cars & Equipment Leasing | Planned |
+| **Phase 5** | 📋 Q4 2026 | Real Estate & Solar | Planned |
 
 ---
 
@@ -179,8 +179,8 @@ cd frontend && npx tsc --noEmit
 
 ## 🔐 Security
 
-- **Audited by**: Code4rena (pending)
-- **Bug Bounty**: $25,000 on Immunefi
+- **Audited by**: (pending)
+- **Bug Bounty**: N/A
 - **Non-custodial**: Bitcoin locked via CLTV timelock
 - **Liquidation**: 75% LTV threshold with automated liquidation
 
@@ -207,10 +207,8 @@ cd frontend && npx tsc --noEmit
 
 ## 📞 Support & Community
 
-- **Discord**: [BitLease Community](https://discord.gg/bitlease)
-- **Twitter**: [@BitLeaseProtocol](https://twitter.com/bitleaseprotocol)
-- **Telegram**: [BitLease Official](https://t.me/bitlease)
-- **Email**: support@bitlease.xyz
+- **Twitter**: [@BitLeaseProtocol](https://twitter.com/bitlease_)
+- **Email**: N/A
 
 ---
 
