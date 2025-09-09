@@ -1,115 +1,100 @@
 const { ethers } = require("hardhat");
 
 async function main() {
+  console.log("🚀 Deploying BitLease to CoreDAO Testnet...\n");
+
   const [deployer] = await ethers.getSigners();
+  console.log("Deploying with account:", deployer.address);
   
-  console.log("Deploying contracts with the account:", deployer.address);
-  console.log("Account balance:", (await deployer.getBalance()).toString());
+  const balance = await deployer.getBalance();
+  console.log("Balance:", ethers.utils.formatEther(balance), "tCORE\n");
 
-  // Deploy Mock Tokens first
-  console.log("\n🚀 Deploying Mock Tokens...");
+  // Deploy Mock Tokens
+  console.log("1. Deploying Mock Tokens...");
+  const MockERC20 = await ethers.getContractFactory("MockERC20");
   
-  const MockBTC = await ethers.getContractFactory("MockBTC");
-  const mockBTC = await MockBTC.deploy();
-  await mockBTC.deployed();
-  console.log("MockBTC deployed to:", mockBTC.address);
-  
-  const MockUSDC = await ethers.getContractFactory("MockUSDC");
-  const mockUSDC = await MockUSDC.deploy();
+  const mockUSDC = await MockERC20.deploy("Mock USDC", "USDC", 6);
   await mockUSDC.deployed();
-  console.log("MockUSDC deployed to:", mockUSDC.address);
+  console.log("✅ Mock USDC:", mockUSDC.address);
 
-  // Deploy Mock Core Staking
-  console.log("\n🚀 Deploying Mock Core Staking...");
-  const MockCoreStaking = await ethers.getContractFactory("MockCoreStaking");
-  const mockCoreStaking = await MockCoreStaking.deploy(mockBTC.address);
-  await mockCoreStaking.deployed();
-  console.log("MockCoreStaking deployed to:", mockCoreStaking.address);
+  const mockWBTC = await MockERC20.deploy("Mock WBTC", "WBTC", 8);
+  await mockWBTC.deployed();
+  console.log("✅ Mock WBTC:", mockWBTC.address);
 
-  // Deploy bBTC Vault
-  console.log("\n🚀 Deploying bBTC Vault...");
+  // Deploy bBTC
+  console.log("\n2. Deploying bBTC...");
   const bBTC = await ethers.getContractFactory("bBTC");
-  const bBTCVault = await bBTC.deploy(
-    mockBTC.address,
-    mockCoreStaking.address,
-    deployer.address // Fee collector
-  );
-  await bBTCVault.deployed();
-  console.log("bBTC Vault deployed to:", bBTCVault.address);
+  const bbtc = await bBTC.deploy(mockWBTC.address);
+  await bbtc.deployed();
+  console.log("✅ bBTC:", bbtc.address);
 
-  // Deploy GPU Oracle
-  console.log("\n🚀 Deploying GPU Oracle...");
+  // Deploy GPUOracle
+  console.log("\n3. Deploying GPUOracle...");
   const GPUOracle = await ethers.getContractFactory("GPUOracle");
-  const gpuOracle = await GPUOracle.deploy();
-  await gpuOracle.deployed();
-  console.log("GPUOracle deployed to:", gpuOracle.address);
+  const oracle = await GPUOracle.deploy();
+  await oracle.deployed();
+  console.log("✅ GPUOracle:", oracle.address);
 
-  // Deploy Lending Pool
-  console.log("\n🚀 Deploying Lending Pool...");
+  // Deploy LendingPool  
+  console.log("\n4. Deploying LendingPool...");
   const LendingPool = await ethers.getContractFactory("LendingPool");
   const lendingPool = await LendingPool.deploy(
-    bBTCVault.address,     // bBTC as collateral
-    mockUSDC.address,      // USDC as borrow token
-    deployer.address,      // Mock price oracle (using deployer for now)
-    deployer.address       // Treasury
+    bbtc.address,
+    mockUSDC.address,
+    deployer.address, // Mock oracle
+    deployer.address  // Treasury
   );
   await lendingPool.deployed();
-  console.log("LendingPool deployed to:", lendingPool.address);
+  console.log("✅ LendingPool:", lendingPool.address);
 
-  // Deploy Lease Manager
-  console.log("\n🚀 Deploying Lease Manager...");
+  // Deploy LeaseManager
+  console.log("\n5. Deploying LeaseManager...");
   const LeaseManager = await ethers.getContractFactory("LeaseManager");
-  const leaseManager = await LeaseManager.deploy(
-    bBTCVault.address,     // bBTC as collateral
-    mockUSDC.address,      // USDC as payment
-    lendingPool.address,   // Lending pool
-    gpuOracle.address,     // GPU oracle
-    deployer.address       // Fee collector
-  );
+  const leaseManager = await LeaseManager.deploy(lendingPool.address, oracle.address);
   await leaseManager.deployed();
-  console.log("LeaseManager deployed to:", leaseManager.address);
+  console.log("✅ LeaseManager:", leaseManager.address);
 
-  // Setup initial liquidity and permissions
-  console.log("\n⚙️ Setting up initial state...");
+  // Initialize with demo data
+  console.log("\n6. Setting up demo data...");
   
-  // Mint initial tokens to deployer
-  await mockBTC.mint(deployer.address, ethers.utils.parseUnits("100", 8)); // 100 BTC
-  await mockUSDC.mint(deployer.address, ethers.utils.parseUnits("1000000", 6)); // 1M USDC
+  // Mint demo tokens for easy testing
+  await mockUSDC.mint(deployer.address, ethers.utils.parseUnits("100000", 6));
+  await mockWBTC.mint(deployer.address, ethers.utils.parseUnits("10", 8));
+  console.log("✅ Minted demo tokens for deployer");
   
-  // Supply initial liquidity to lending pool
-  await mockUSDC.approve(lendingPool.address, ethers.utils.parseUnits("500000", 6));
-  await lendingPool.supply(ethers.utils.parseUnits("500000", 6)); // 500k USDC
-  
-  console.log("\n✅ Deployment completed successfully!");
-  console.log("\n📋 Contract Addresses:");
-  console.log("=".repeat(50));
-  console.log("MockBTC:", mockBTC.address);
-  console.log("MockUSDC:", mockUSDC.address);
-  console.log("MockCoreStaking:", mockCoreStaking.address);
-  console.log("bBTC Vault:", bBTCVault.address);
-  console.log("GPUOracle:", gpuOracle.address);
-  console.log("LendingPool:", lendingPool.address);
-  console.log("LeaseManager:", leaseManager.address);
-  console.log("=".repeat(50));
+  console.log("\n🎉 DEPLOYMENT COMPLETE!");
+  console.log("=" .repeat(50));
+  console.log("📋 CONTRACT ADDRESSES:");
+  console.log("MOCK_USDC_ADDRESS=" + mockUSDC.address);
+  console.log("MOCK_WBTC_ADDRESS=" + mockWBTC.address);
+  console.log("BBTC_ADDRESS=" + bbtc.address);
+  console.log("LENDING_POOL_ADDRESS=" + lendingPool.address);
+  console.log("GPU_ORACLE_ADDRESS=" + oracle.address);
+  console.log("LEASE_MANAGER_ADDRESS=" + leaseManager.address);
+  console.log("=" .repeat(50));
+  console.log("🔗 Explorer: https://scan.test2.coredao.org");
+  console.log("💰 Faucet: https://scan.test2.coredao.org/faucet");
 
-  // Save addresses to a file for frontend use
+  // Save addresses for frontend
   const addresses = {
-    MockBTC: mockBTC.address,
-    MockUSDC: mockUSDC.address,
-    MockCoreStaking: mockCoreStaking.address,
-    bBTC: bBTCVault.address,
-    GPUOracle: gpuOracle.address,
-    LendingPool: lendingPool.address,
-    LeaseManager: leaseManager.address,
+    mockUSDC: mockUSDC.address,
+    mockWBTC: mockWBTC.address,
+    bBTC: bbtc.address,
+    lendingPool: lendingPool.address,
+    gpuOracle: oracle.address,
+    leaseManager: leaseManager.address,
     deployer: deployer.address
   };
 
   const fs = require("fs");
+  const path = require("path");
+  
+  // Save addresses
   fs.writeFileSync(
-    "./frontend/src/contracts/addresses.json",
+    path.join(__dirname, "../deployed-addresses.json"),
     JSON.stringify(addresses, null, 2)
   );
-  console.log("\n💾 Contract addresses saved to frontend/src/contracts/addresses.json");
+  console.log("\n💾 Contract addresses saved to deployed-addresses.json");
 }
 
 main()

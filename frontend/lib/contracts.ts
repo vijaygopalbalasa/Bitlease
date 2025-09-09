@@ -1,14 +1,14 @@
 import { Address } from 'viem'
 
-// Contract addresses - Working addresses that show WBTC balances
+// Contract addresses - Updated with latest deployment
 export const CONTRACTS: Record<string, Address> = {
-  bBTC: '0x9a0B35613E212C3dB9673Ad4071E9C2257E71370',
-  LendingPool: '0x35c78E577Cd4EfBd6097704BE2d52A1380e8A269', 
-  LeaseManager: '0x2d06997dccD602a2CC57dE8B7f366998F075C7e2',
-  BTCPriceOracle: '0xdeBe1Ad46FF9a580e9652D2636D3a25583492a7B',
-  GPUOracle: '0xE88d4fE7dAA65D68E2A160Eeb4b813F5149220fF',
-  WBTC: '0x824cB559596C7F538525bCCF41d006Ad1fFa6a8F',
-  USDC: '0x46C924F5F9be1E6A4F87B2a000CC70d4D4027266',
+  bBTC: '0xEedc241a5D88e3219933cD19E0Ba4FbC3F6a0b3f',
+  LendingPool: '0x5BFEA3C0becf2251EB1Fd5df5865A323d98daFb6', 
+  LeaseManager: '0x8567B7A4a327Bd1208d841998D2698042Fbd70D4',
+  BTCPriceOracle: '0xE4e0954CCb4e78621a9Cf2B196fFed1bc70b3C55', // Using GPU Oracle for now
+  GPUOracle: '0xE4e0954CCb4e78621a9Cf2B196fFed1bc70b3C55',
+  WBTC: '0xCcEBD2074f24EFe90aB2d908e22fe083a140597D',
+  USDC: '0x7D13e2e0E0c3370584815cb70570000878970EE3',
 } as const
 
 export const CORE_TESTNET = {
