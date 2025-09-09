@@ -4,7 +4,8 @@
   "description": "BitLease - GPU leasing platform using Bitcoin staking collateral",
   "main": "index.js",
   "scripts": {
-    "build": "hardhat compile",
+    "build": "cd frontend && npm install && npm run build",
+    "build:contracts": "hardhat compile",
     "test": "hardhat test",
     "deploy": "hardhat run scripts/deploy.js",
     "deploy:testnet": "hardhat run scripts/deploy.js --network core_testnet",
@@ -33,6 +34,9 @@
   "dependencies": {
     "@openzeppelin/contracts": "^4.9.0",
     "dotenv": "^17.2.2",
-    "ethers": "^5.7.0"
+    "ethers": "^5.7.0",
+    "next": "14.2.5",
+    "react": "^18",
+    "react-dom": "^18"
   }
 }

@@ -2,7 +2,9 @@
   "name": "bitlease-protocol",
   "buildCommand": "./build.sh",
   "outputDirectory": "frontend/.next",
-  "installCommand": "echo 'Dependencies installed via build script'",
+  "installCommand": "npm install",
   "devCommand": "cd frontend && npm run dev",
-  "framework": "nextjs"
+  "framework": "nextjs",
+  "functions": {},
+  "public": false
 }
