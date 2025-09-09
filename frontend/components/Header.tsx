@@ -52,7 +52,7 @@ export function Header() {
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-60 h-60 bg-gradient-to-br from-blue-400/5 to-purple-500/5 rounded-full blur-3xl animate-ping" style={{animationDuration: '6s'}} />
       </div>
 
-      <nav className={`relative mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-8 transition-all duration-1000 ease-out ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}>
+      <nav className={`relative mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-6 py-4 lg:px-8 transition-all duration-1000 ease-out ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}>
         {/* Enhanced Logo */}
         <div className="flex lg:flex-1">
           <Link href="/" className="group -m-1.5 p-1.5 relative">
@@ -64,8 +64,20 @@ export function Header() {
           </Link>
         </div>
         
-        {/* Enhanced Mobile Menu Button */}
-        <div className="flex lg:hidden">
+        {/* Mobile Actions - Menu & Wallet */}
+        <div className="flex lg:hidden items-center space-x-3">
+          {/* Mobile Wallet Connection - Compact */}
+          <div className={`transition-all duration-1000 ease-out ${isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-4'}`} style={{ transitionDelay: '200ms' }}>
+            <div className="relative">
+              <div className="absolute -inset-1 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-xl blur-md"></div>
+              <div className="relative bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 hover:border-blue-500/50 rounded-xl p-0.5 shadow-lg hover:shadow-blue-500/20 transition-all duration-300">
+                {/* @ts-ignore */}
+                <w3m-button size="sm" />
+              </div>
+            </div>
+          </div>
+          
+          {/* Mobile Menu Button */}
           <button
             type="button"
             className="group -m-2.5 inline-flex items-center justify-center rounded-xl p-3 text-gray-400 hover:text-white bg-slate-800/50 hover:bg-slate-700/50 border border-slate-700/50 hover:border-orange-500/50 backdrop-blur-xl transition-all duration-300 shadow-lg"
@@ -98,7 +110,7 @@ export function Header() {
           })}
         </div>
         
-        {/* Enhanced Wallet Connection */}
+        {/* Enhanced Wallet Connection - Desktop Only */}
         <div className={`hidden lg:flex lg:flex-1 lg:justify-end transition-all duration-1000 ease-out ${isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-4'}`} style={{ transitionDelay: '400ms' }}>
           <div className="relative">
             <div className="absolute -inset-2 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-2xl blur-lg"></div>
