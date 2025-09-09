@@ -30,7 +30,7 @@ export default function Home() {
       icon: "💳",
       title: "Borrow & Lease",
       description: "Use bBTC as collateral to borrow USDC. Instantly lease GPUs, cars, or solar panels.",
-      step: "Step 2", 
+      step: "Step 2",
       gradient: "from-purple-400 via-purple-500 to-pink-500",
       glowColor: "shadow-purple-500/30"
     },
@@ -89,8 +89,8 @@ export default function Home() {
         {/* Gradient Orbs */}
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-orange-400/20 to-red-500/20 rounded-full blur-3xl animate-pulse" />
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-purple-400/20 to-blue-500/20 rounded-full blur-3xl animate-pulse delay-1000" />
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br from-blue-400/10 to-purple-500/10 rounded-full blur-3xl animate-ping" style={{animationDuration: '8s'}} />
-        
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br from-blue-400/10 to-purple-500/10 rounded-full blur-3xl animate-ping" style={{ animationDuration: '8s' }} />
+
         {/* Floating Elements */}
         <div className="absolute top-20 left-20 w-2 h-2 bg-orange-400 rounded-full animate-bounce delay-1000" />
         <div className="absolute top-40 right-32 w-3 h-3 bg-purple-400 rounded-full animate-bounce delay-2000" />
@@ -110,7 +110,7 @@ export default function Home() {
               </div>
               <span className="text-green-300 font-semibold text-sm">Live on CoreDAO Testnet</span>
             </div>
-            
+
             {/* Main Headline */}
             <h1 className="text-6xl md:text-8xl font-black text-white mb-8 leading-tight">
               Turn Your Bitcoin Into
@@ -122,44 +122,44 @@ export default function Home() {
                 <div className="absolute -inset-2 bg-gradient-to-r from-orange-400/20 to-pink-400/20 blur-xl -z-10 rounded-lg"></div>
               </span>
             </h1>
-            
+
             {/* Subtitle */}
             <p className="text-2xl text-gray-300 mb-12 max-w-4xl mx-auto leading-relaxed font-light">
-              Lease GPUs, cars, and solar panels using your Bitcoin as collateral while it keeps earning 
+              Lease GPUs, cars, and solar panels using your Bitcoin as collateral while it keeps earning
               <span className="text-orange-400 font-semibold"> 5.5% APY</span>. No selling, no taxes, no credit checks.
             </p>
-            
+
             {/* Demo Flow Card */}
             <div className="max-w-4xl mx-auto mb-12">
               <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl border border-slate-700/50 rounded-3xl p-8 relative overflow-hidden">
                 {/* Animated Border */}
                 <div className="absolute inset-0 bg-gradient-to-r from-orange-500/20 via-purple-500/20 to-blue-500/20 rounded-3xl opacity-50 animate-pulse"></div>
                 <div className="absolute inset-px bg-gradient-to-br from-slate-800/90 to-slate-900/90 rounded-3xl"></div>
-                
+
                 <div className="relative z-10">
                   <h3 className="text-3xl font-bold text-white mb-6 flex items-center justify-center gap-3">
                     🧪 Interactive Demo Flow
                   </h3>
-                  
+
                   <div className="grid md:grid-cols-3 gap-6">
                     {[
-                      { 
-                        num: "1", 
-                        title: "Stake WBTC → Get bBTC", 
+                      {
+                        num: "1",
+                        title: "Stake WBTC → Get bBTC",
                         desc: "Experience Core DAO dual staking with real yield calculation",
                         icon: "₿",
                         color: "from-orange-500 to-red-500"
                       },
-                      { 
-                        num: "2", 
-                        title: "Use bBTC as Collateral", 
+                      {
+                        num: "2",
+                        title: "Use bBTC as Collateral",
                         desc: "Lock bBTC → borrow USDC → see 50% LTV mechanics",
                         icon: "💳",
                         color: "from-purple-500 to-pink-500"
                       },
-                      { 
-                        num: "3", 
-                        title: "Repay & Unlock", 
+                      {
+                        num: "3",
+                        title: "Repay & Unlock",
                         desc: "Complete the credit cycle - bBTC keeps earning yield",
                         icon: "🔓",
                         color: "from-blue-500 to-cyan-500"
@@ -184,7 +184,7 @@ export default function Home() {
                       </div>
                     ))}
                   </div>
-                  
+
                   <div className="mt-6 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-2xl">
                     <p className="text-yellow-200 text-sm">
                       <strong>Note:</strong> GPU leasing integration coming soon. Currently showcasing core lending mechanics on testnet.
@@ -193,7 +193,7 @@ export default function Home() {
                 </div>
               </div>
             </div>
-            
+
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-8">
               <Link href="/stake">
@@ -206,7 +206,7 @@ export default function Home() {
                   <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-1000 delay-200"></div>
                 </Button>
               </Link>
-              
+
               <Link href="/dashboard">
                 <Button variant="outline" className="group relative border-2 border-slate-600 text-white hover:border-orange-500 px-10 py-5 rounded-2xl text-xl font-bold backdrop-blur-xl transition-all duration-500 transform hover:scale-105 overflow-hidden">
                   <span className="relative z-10 flex items-center">
@@ -225,16 +225,14 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {stats.map((stat, index) => (
-              <div 
-                key={index} 
-                className={`text-center group cursor-pointer transform transition-all duration-700 hover:scale-110 ${
-                  currentStat === index ? 'scale-105' : ''
-                }`}
+              <div
+                key={index}
+                className={`text-center group cursor-pointer transform transition-all duration-700 hover:scale-110 ${currentStat === index ? 'scale-105' : ''
+                  }`}
               >
                 <div className={`relative p-6 rounded-2xl ${currentStat === index ? 'bg-gradient-to-br from-orange-500/20 to-purple-500/20 ring-2 ring-orange-500/50' : 'bg-slate-800/30'} transition-all duration-500 hover:bg-gradient-to-br hover:from-slate-700/50 hover:to-slate-600/50`}>
-                  <div className={`text-4xl md:text-5xl font-black mb-2 transition-all duration-500 ${
-                    currentStat === index ? stat.color : 'text-white group-hover:' + stat.color
-                  }`}>
+                  <div className={`text-4xl md:text-5xl font-black mb-2 transition-all duration-500 ${currentStat === index ? stat.color : 'text-white group-hover:' + stat.color
+                    }`}>
                     {stat.value}
                   </div>
                   <div className="text-orange-300 font-bold text-lg mb-1">{stat.label}</div>
@@ -260,11 +258,11 @@ export default function Home() {
               Three simple steps to turn your idle Bitcoin into productive capital
             </p>
           </div>
-          
+
           <div className="grid md:grid-cols-3 gap-12 relative">
             {/* Connecting Line */}
             <div className="hidden md:block absolute top-20 left-1/6 right-1/6 h-1 bg-gradient-to-r from-orange-500 via-purple-500 to-blue-500 rounded-full opacity-30"></div>
-            
+
             {features.map((feature, index) => (
               <div
                 key={index}
@@ -275,14 +273,14 @@ export default function Home() {
                 <div className="relative bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl border border-slate-700/50 rounded-3xl p-8 hover:border-orange-500/50 transition-all duration-500 overflow-visible group-hover:shadow-2xl group-hover:shadow-orange-500/20">
                   {/* Animated Background */}
                   <div className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-10 transition-all duration-500 rounded-3xl z-0`}></div>
-                  
+
                   {/* Step Number Badge - Higher z-index */}
                   <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-30">
                     <div className={`bg-gradient-to-br ${feature.gradient} px-4 py-2 rounded-full text-white font-bold text-sm shadow-lg ${feature.glowColor} relative z-30`}>
                       {feature.step}
                     </div>
                   </div>
-                  
+
                   {/* Icon */}
                   <div className="relative z-20 mb-8">
                     <div className={`text-6xl mb-4 transform group-hover:scale-110 group-hover:rotate-12 transition-all duration-500`}>
@@ -291,7 +289,7 @@ export default function Home() {
                     {/* Pulsing Ring */}
                     <div className={`absolute inset-0 w-20 h-20 mx-auto bg-gradient-to-br ${feature.gradient} rounded-full opacity-0 group-hover:opacity-20 animate-ping z-0`}></div>
                   </div>
-                  
+
                   {/* Content */}
                   <div className="relative z-20">
                     <h3 className="text-2xl font-bold text-white mb-4 group-hover:text-orange-300 transition-colors duration-300">
@@ -301,7 +299,7 @@ export default function Home() {
                       {feature.description}
                     </p>
                   </div>
-                  
+
                   {/* Hover Border Effect - Lower z-index */}
                   <div className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10">
                     <div className={`absolute inset-0 rounded-3xl bg-gradient-to-r ${feature.gradient} p-0.5`}>
@@ -309,7 +307,7 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
-                
+
                 {/* Arrow to Next Step */}
                 {index < 2 && (
                   <div className="hidden md:block absolute top-1/2 -right-8 transform -translate-y-1/2 text-3xl text-orange-400 animate-bounce z-20">
@@ -333,7 +331,7 @@ export default function Home() {
               Experience the future of Bitcoin-backed financial services
             </p>
           </div>
-          
+
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {benefits.map((benefit, index) => (
               <div
@@ -342,12 +340,12 @@ export default function Home() {
               >
                 {/* Gradient Background */}
                 <div className={`absolute inset-0 bg-gradient-to-br ${benefit.color} opacity-0 group-hover:opacity-10 transition-all duration-500 rounded-3xl`}></div>
-                
+
                 {/* Icon */}
                 <div className={`w-16 h-16 bg-gradient-to-br ${benefit.color} rounded-2xl flex items-center justify-center mb-6 transform group-hover:scale-110 group-hover:rotate-12 transition-all duration-300 shadow-lg`}>
                   <benefit.icon className="h-8 w-8 text-white" />
                 </div>
-                
+
                 {/* Content */}
                 <div className="relative z-10">
                   <h3 className="text-xl font-bold text-white mb-3 group-hover:text-orange-300 transition-colors duration-300">
@@ -360,7 +358,7 @@ export default function Home() {
                     {benefit.subtitle}
                   </p>
                 </div>
-                
+
                 {/* Shine Effect */}
                 <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent transition-transform duration-1000"></div>
               </div>
@@ -380,11 +378,11 @@ export default function Home() {
               Bitcoin Work Harder?
             </span>
           </h2>
-          
+
           <p className="text-2xl text-gray-300 mb-12 max-w-3xl mx-auto font-light">
             Join the revolution of Bitcoin-backed asset leasing. Experience the future today on CoreDAO testnet.
           </p>
-          
+
           <div className="flex flex-col sm:flex-row items-center justify-center space-y-6 sm:space-y-0 sm:space-x-8">
             <Link href="/stake">
               <Button className="group relative bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 hover:from-orange-600 hover:via-red-600 hover:to-pink-600 text-white px-12 py-6 rounded-2xl text-2xl font-bold shadow-2xl shadow-orange-500/30 transform hover:scale-110 transition-all duration-500 overflow-hidden">
@@ -396,7 +394,7 @@ export default function Home() {
                 <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-1000 delay-300"></div>
               </Button>
             </Link>
-            
+
             <Link href="/dashboard">
               <Button variant="outline" className="group relative border-2 border-slate-600 hover:border-orange-500 text-white px-12 py-6 rounded-2xl text-2xl font-bold backdrop-blur-xl transition-all duration-500 transform hover:scale-105 overflow-hidden">
                 <span className="relative z-10 flex items-center">
@@ -429,7 +427,7 @@ export default function Home() {
                 Revolutionizing how Bitcoin holders access real-world assets through innovative collateral mechanisms on CoreDAO.
               </p>
             </div>
-            
+
             {/* Links */}
             <div>
               <h3 className="text-white font-bold text-lg mb-4">Protocol</h3>
@@ -440,7 +438,7 @@ export default function Home() {
                 <a href="#" className="block text-gray-400 hover:text-orange-400 transition-colors">Audit Reports</a>
               </div>
             </div>
-            
+
             <div>
               <h3 className="text-white font-bold text-lg mb-4">Community</h3>
               <div className="space-y-3">
@@ -451,10 +449,10 @@ export default function Home() {
               </div>
             </div>
           </div>
-          
+
           <div className="pt-8 border-t border-slate-700/50 flex flex-col md:flex-row justify-between items-center">
             <div className="text-gray-400 mb-4 md:mb-0">
-              © 2024 BitLease. Built on CoreDAO. Open source MIT license.
+              © 2025 BitLease. Built on CoreDAO. Open source MIT license.
             </div>
             <div className="flex items-center space-x-6">
               <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
