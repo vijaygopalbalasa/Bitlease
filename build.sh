@@ -12,7 +12,7 @@ echo "Frontend directory contents:"
 ls -la
 
 echo "Installing dependencies..."
-npm ci
+npm install
 
 echo "Building Next.js application..."
 npm run build
