@@ -272,12 +272,6 @@ export function useBitLeaseStaking() {
   const deposit = (amount: bigint) => {
     if (!address) return
     
-    // Check allowance first
-    if (!allowance || allowance < amount) {
-      alert('❌ Insufficient Allowance\n\nPlease approve WBTC first before staking.')
-      return
-    }
-    
     try {
       (writeContract as any)({
         address: CONTRACTS.bBTC,
