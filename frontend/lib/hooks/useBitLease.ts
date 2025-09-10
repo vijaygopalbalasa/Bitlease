@@ -259,10 +259,6 @@ export function useBitLeaseStaking() {
   // Approve WBTC for bBTC contract
   const approveWBTC = (amount: bigint) => {
     if (!address) return
-    console.log('Approving WBTC for bBTC contract:', {
-      spender: CONTRACTS.bBTC,
-      amount: amount.toString()
-    })
     (writeContract as any)({
       address: CONTRACTS.WBTC,
       abi: MockWBTCABI,
@@ -278,20 +274,9 @@ export function useBitLeaseStaking() {
     
     // Check allowance first
     if (!allowance || allowance < amount) {
-      console.error('Insufficient allowance for deposit:', {
-        allowance: allowance?.toString(),
-        required: amount.toString()
-      })
       alert('❌ Insufficient Allowance\n\nPlease approve WBTC first before staking.')
       return
     }
-    
-    console.log('Attempting deposit:', {
-      contract: CONTRACTS.bBTC,
-      amount: amount.toString(),
-      allowance: allowance?.toString(),
-      address
-    })
     
     try {
       (writeContract as any)({
@@ -302,7 +287,7 @@ export function useBitLeaseStaking() {
         gas: BigInt("200000") // Manual gas limit for testnet
       })
     } catch (error) {
-      console.error('Deposit contract call failed:', error)
+      // Error will be handled by wagmi
     }
   }
 

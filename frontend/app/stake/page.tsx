@@ -61,7 +61,7 @@ export default function StakePage() {
       const amount = parseUnits(stakeAmount, 8); // WBTC has 8 decimals
       approveWBTC(amount);
     } catch (error) {
-      console.error('Approval failed:', error);
+      // Error will be handled by wagmi
     } finally {
       setIsStaking(false);
     }
@@ -75,7 +75,7 @@ export default function StakePage() {
       const amount = parseUnits(stakeAmount, 8); // WBTC has 8 decimals
       deposit(amount);
     } catch (error) {
-      console.error('Staking failed:', error);
+      // Error will be handled by wagmi
     } finally {
       setIsStaking(false);
     }
