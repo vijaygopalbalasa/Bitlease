@@ -28,6 +28,7 @@ export default function StakePage() {
   const { 
     bbtcBalance, 
     exchangeRate, 
+    allowance,
     deposit, 
     withdraw,
     approveWBTC,
@@ -80,11 +81,27 @@ export default function StakePage() {
     }
   };
 
+  // Check allowance to determine if we need approval
+  useEffect(() => {
+    if (stakeAmount && allowance) {
+      const amount = parseUnits(stakeAmount, 8);
+      if (allowance >= amount) {
+        setStep('stake');
+        setIsApproved(true);
+      } else {
+        setStep('approve');
+        setIsApproved(false);
+      }
+    }
+  }, [stakeAmount, allowance]);
+
   // Switch to stake step after successful approval
-  if (isSuccess && step === 'approve') {
-    setStep('stake');
-    setIsApproved(true);
-  }
+  useEffect(() => {
+    if (isSuccess && step === 'approve') {
+      setStep('stake');
+      setIsApproved(true);
+    }
+  }, [isSuccess, step]);
 
   const maxStake = wbtcBalance ? Number(wbtcBalance.value) / 1e8 : 0;
 
@@ -305,8 +322,24 @@ export default function StakePage() {
                         MAX
                       </button>
                     </div>
-                    <div className="mt-4 text-gray-400 font-medium">
-                      Exchange Rate: 1 WBTC = {exchangeRate} bBTC
+                    <div className="mt-4 space-y-2">
+                      <div className="text-gray-400 font-medium">
+                        Exchange Rate: 1 WBTC = {exchangeRate} bBTC
+                      </div>
+                      {stakeAmount && (
+                        <div className="flex items-center space-x-2">
+                          <span className="text-sm text-gray-400">Allowance Status:</span>
+                          {allowance >= parseUnits(stakeAmount, 8) ? (
+                            <span className="text-green-400 text-sm font-semibold flex items-center">
+                              ✓ Approved
+                            </span>
+                          ) : (
+                            <span className="text-orange-400 text-sm font-semibold flex items-center">
+                              ⚠ Approval Required
+                            </span>
+                          )}
+                        </div>
+                      )}
                     </div>
                     
                     {/* Enhanced Exchange Rate Explanation */}

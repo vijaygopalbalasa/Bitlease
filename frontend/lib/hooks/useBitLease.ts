@@ -193,6 +193,13 @@ const MockWBTCABI = [
     outputs: [{ name: "", type: "bool" }],
     stateMutability: "nonpayable",
     type: "function"
+  },
+  {
+    inputs: [{ name: "owner", type: "address" }, { name: "spender", type: "address" }],
+    name: "allowance",
+    outputs: [{ name: "", type: "uint256" }],
+    stateMutability: "view",
+    type: "function"
   }
 ] as const
 
@@ -240,39 +247,62 @@ export function useBitLeaseStaking() {
     functionName: 'getExchangeRate'
   })
 
+  // Read allowance to check if approval is needed
+  const { data: allowance } = useReadContract({
+    address: CONTRACTS.WBTC,
+    abi: MockWBTCABI,
+    functionName: 'allowance',
+    args: address ? [address, CONTRACTS.bBTC] : undefined,
+    query: { enabled: !!address }
+  })
+
   // Approve WBTC for bBTC contract
   const approveWBTC = (amount: bigint) => {
     if (!address) return
-    // // console.log('Approving WBTC for bBTC contract:', {
-    //   spender: CONTRACTS.bBTC,
-    //   amount: amount.toString()
-    // })
+    console.log('Approving WBTC for bBTC contract:', {
+      spender: CONTRACTS.bBTC,
+      amount: amount.toString()
+    })
     (writeContract as any)({
       address: CONTRACTS.WBTC,
       abi: MockWBTCABI,
       functionName: 'approve',
-      args: [CONTRACTS.bBTC, amount]
+      args: [CONTRACTS.bBTC, amount],
+      gas: BigInt("100000") // Manual gas limit for testnet
     })
   }
 
   // Deposit function
   const deposit = (amount: bigint) => {
     if (!address) return
-    // console.log('Attempting deposit:', {
-    //   contract: CONTRACTS.bBTC,
-    //   amount: amount.toString(),
-    //   wbtcBalance: (bbtcBalance as bigint)?.toString(),
-    //   address
-    // })
+    
+    // Check allowance first
+    if (!allowance || allowance < amount) {
+      console.error('Insufficient allowance for deposit:', {
+        allowance: allowance?.toString(),
+        required: amount.toString()
+      })
+      alert('❌ Insufficient Allowance\n\nPlease approve WBTC first before staking.')
+      return
+    }
+    
+    console.log('Attempting deposit:', {
+      contract: CONTRACTS.bBTC,
+      amount: amount.toString(),
+      allowance: allowance?.toString(),
+      address
+    })
+    
     try {
       (writeContract as any)({
         address: CONTRACTS.bBTC,
         abi: bBTCABI,
         functionName: 'deposit',
-        args: [amount, address]
+        args: [amount, address],
+        gas: BigInt("200000") // Manual gas limit for testnet
       })
     } catch (error) {
-      // console.error('Deposit contract call failed:', error)
+      console.error('Deposit contract call failed:', error)
     }
   }
 
@@ -324,6 +354,7 @@ export function useBitLeaseStaking() {
   return {
     bbtcBalance: bbtcBalance ? formatUnits(bbtcBalance as bigint, 8) : '0',
     exchangeRate: exchangeRate ? formatUnits(exchangeRate as bigint, 18) : '1',
+    allowance: allowance || 0n,
     deposit,
     withdraw,
     approveWBTC,
