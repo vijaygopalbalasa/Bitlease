@@ -18,6 +18,7 @@ export default function StakePage() {
   const [step, setStep] = useState<'approve' | 'stake'>('approve');
   const [isVisible, setIsVisible] = useState(false);
   const [activeStep, setActiveStep] = useState(0);
+  const [lastTransaction, setLastTransaction] = useState<'approve' | 'stake' | null>(null);
   
   const { address, isConnected } = useAccount();
   const { data: wbtcBalance } = useBalance({
@@ -58,6 +59,7 @@ export default function StakePage() {
     
     try {
       setIsStaking(true);
+      setLastTransaction('approve');
       const amount = parseUnits(stakeAmount, 8); // WBTC has 8 decimals
       approveWBTC(amount);
     } catch (error) {
@@ -72,6 +74,7 @@ export default function StakePage() {
     
     try {
       setIsStaking(true);
+      setLastTransaction('stake');
       const amount = parseUnits(stakeAmount, 8); // WBTC has 8 decimals
       deposit(amount);
     } catch (error) {
@@ -396,8 +399,8 @@ export default function StakePage() {
                     <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-1000 delay-200"></div>
                   </Button>
 
-                  {/* Enhanced Success Message */}
-                  {isSuccess && hash && (
+                  {/* Enhanced Success Message - Only for Staking */}
+                  {isSuccess && hash && lastTransaction === 'stake' && (
                     <div className="p-6 bg-gradient-to-r from-green-500/20 to-teal-500/20 border border-green-500/30 rounded-2xl">
                       <div className="flex items-center mb-4">
                         <div className="w-10 h-10 bg-green-500 rounded-xl flex items-center justify-center mr-4">
@@ -413,6 +416,28 @@ export default function StakePage() {
                         className="inline-flex items-center text-blue-400 hover:text-blue-300 font-semibold transition-colors duration-200"
                       >
                         🔗 View transaction on CoreScan
+                        <ArrowRightIcon className="h-4 w-4 ml-2" />
+                      </a>
+                    </div>
+                  )}
+
+                  {/* Approval Success Message */}
+                  {isSuccess && hash && lastTransaction === 'approve' && (
+                    <div className="p-6 bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-500/30 rounded-2xl">
+                      <div className="flex items-center mb-4">
+                        <div className="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center mr-4">
+                          <CheckCircleIcon className="h-6 w-6 text-white" />
+                        </div>
+                        <span className="text-blue-300 font-bold text-lg">WBTC Approved!</span>
+                      </div>
+                      <p className="text-blue-200 mb-4">You can now stake your WBTC to earn CORE rewards.</p>
+                      <a 
+                        href={`https://scan.test2.btcs.network/tx/${hash}`}
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center text-blue-400 hover:text-blue-300 font-semibold transition-colors duration-200"
+                      >
+                        🔗 View approval transaction on CoreScan
                         <ArrowRightIcon className="h-4 w-4 ml-2" />
                       </a>
                     </div>
