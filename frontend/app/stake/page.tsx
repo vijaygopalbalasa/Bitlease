@@ -100,11 +100,15 @@ export default function StakePage() {
 
   // Switch to stake step after successful approval
   useEffect(() => {
-    if (isSuccess && step === 'approve') {
-      setStep('stake');
-      setIsApproved(true);
+    if (isSuccess && step === 'approve' && lastTransaction === 'approve') {
+      // Small delay to allow blockchain state to update
+      const timer = setTimeout(() => {
+        setStep('stake');
+        setIsApproved(true);
+      }, 2000); // 2 second delay
+      return () => clearTimeout(timer);
     }
-  }, [isSuccess, step]);
+  }, [isSuccess, step, lastTransaction]);
 
   const maxStake = wbtcBalance ? Number(wbtcBalance.value) / 1e8 : 0;
 

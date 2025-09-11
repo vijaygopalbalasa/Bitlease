@@ -14,6 +14,13 @@ const bBTCABI = [
     type: "function"
   },
   {
+    inputs: [{ name: "assets", type: "uint256" }],
+    name: "deposit",
+    outputs: [{ name: "shares", type: "uint256" }],
+    stateMutability: "nonpayable",
+    type: "function"
+  },
+  {
     inputs: [{ name: "account", type: "address" }],
     name: "balanceOf",
     outputs: [{ name: "", type: "uint256" }],
@@ -272,16 +279,61 @@ export function useBitLeaseStaking() {
   const deposit = (amount: bigint) => {
     if (!address) return
     
+    // Pre-flight checks
+    if (!allowance || allowance < amount) {
+      console.error('Insufficient allowance for deposit:', {
+        required: amount.toString(),
+        current: allowance?.toString() || '0'
+      })
+      alert('❌ Insufficient WBTC allowance. Please approve WBTC tokens first.')
+      return
+    }
+    
+    // Debug logging
+    console.log('Deposit attempt:', {
+      contract: CONTRACTS.bBTC,
+      amount: amount.toString(),
+      receiver: address,
+      allowance: allowance?.toString(),
+      isAllowanceSufficient: allowance >= amount,
+      wbtcContract: CONTRACTS.WBTC
+    })
+    
     try {
+      // Try the single parameter deposit function first (ERC4626 standard)
       (writeContract as any)({
         address: CONTRACTS.bBTC,
-        abi: bBTCABI,
+        abi: [
+          {
+            inputs: [{ name: "assets", type: "uint256" }],
+            name: "deposit",
+            outputs: [{ name: "shares", type: "uint256" }],
+            stateMutability: "nonpayable",
+            type: "function"
+          }
+        ],
         functionName: 'deposit',
-        args: [amount, address],
-        gas: BigInt("200000") // Manual gas limit for testnet
+        args: [amount],
+        gas: BigInt("300000"), // Increased gas limit
+        gasPrice: BigInt("20000000000") // 20 gwei for testnet
       })
     } catch (error) {
-      // Error will be handled by wagmi
+      console.error('Deposit contract call failed, trying alternative signature:', error)
+      
+      // Fallback to two-parameter version
+      try {
+        (writeContract as any)({
+          address: CONTRACTS.bBTC,
+          abi: bBTCABI,
+          functionName: 'deposit',
+          args: [amount, address],
+          gas: BigInt("300000"), // Increased gas limit
+          gasPrice: BigInt("20000000000") // 20 gwei for testnet
+        })
+      } catch (fallbackError) {
+        console.error('Both deposit signatures failed:', fallbackError)
+        alert('❌ Deposit transaction failed. The smart contract may have issues.')
+      }
     }
   }
 
