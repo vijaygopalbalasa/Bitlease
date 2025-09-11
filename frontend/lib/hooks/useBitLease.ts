@@ -675,12 +675,17 @@ export function useBitLeaseLending() {
     
     console.log('🚀 All validations passed - proceeding with borrow transaction...')
     
-    (writeContract as any)({
-      address: CONTRACTS.LendingPool,
-      abi: LendingPoolABI,
-      functionName: 'borrow',
-      args: [collateralAmount, borrowAmount]
-    })
+    try {
+      (writeContract as any)({
+        address: CONTRACTS.LendingPool,
+        abi: LendingPoolABI,
+        functionName: 'borrow',
+        args: [collateralAmount, borrowAmount]
+      })
+      console.log('✅ Borrow transaction initiated successfully')
+    } catch (error) {
+      console.error('❌ Error initiating borrow transaction:', error)
+    }
   }
 
   // Repay function
