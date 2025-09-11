@@ -8,62 +8,11 @@ import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { Input } from '../../components/ui/Input';
 import { useBitLeaseGPU, useBitLeaseGPUPrice, useBitLeaseLeases, useBitLeaseStaking, useBitLeaseLending } from '../../lib/hooks/useBitLease';
+import { useProfessionalBTCPrice } from '../../lib/hooks/usePriceOracle';
 import { CONTRACTS } from '../../lib/contracts';
 import Link from 'next/link';
 
-// Professional BTC price fetching hook
-function useBTCPrice() {
-  const [btcPrice, setBtcPrice] = useState<number | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchBTCPrice = async () => {
-      try {
-        setIsLoading(true);
-        
-        // Try CoinGecko first (free, reliable)
-        const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd');
-        const data = await response.json();
-        
-        if (data.bitcoin?.usd) {
-          setBtcPrice(data.bitcoin.usd);
-          setError(null);
-        } else {
-          throw new Error('Invalid response from CoinGecko');
-        }
-      } catch (err) {
-        try {
-          // Fallback to CoinCap API
-          const fallbackResponse = await fetch('https://api.coincap.io/v2/assets/bitcoin');
-          const fallbackData = await fallbackResponse.json();
-          
-          if (fallbackData.data?.priceUsd) {
-            setBtcPrice(parseFloat(fallbackData.data.priceUsd));
-            setError(null);
-          } else {
-            throw new Error('Both APIs failed');
-          }
-        } catch (fallbackErr) {
-          // Ultimate fallback to reasonable estimate
-          console.warn('BTC price APIs failed, using fallback price');
-          setBtcPrice(65000); // From deployment config as fallback
-          setError('Using estimated price');
-        }
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchBTCPrice();
-    
-    // Refresh every 30 seconds
-    const interval = setInterval(fetchBTCPrice, 30000);
-    return () => clearInterval(interval);
-  }, []);
-
-  return { btcPrice, isLoading, error };
-}
+// Using professional oracle from usePriceOracle.ts
 
 export default function LeasePage() {
   const [selectedGPU, setSelectedGPU] = useState('A100');
@@ -85,14 +34,14 @@ export default function LeasePage() {
     token: CONTRACTS.USDC,
   });
   
-  // Use real BTC price from market APIs
-  const { btcPrice: realBtcPrice, isLoading: isBtcPriceLoading, error: btcPriceError } = useBTCPrice();
+  // Use professional multi-source BTC price oracle
+  const { price: realBtcPrice, isLoading: isBtcPriceLoading, error: btcPriceError } = useProfessionalBTCPrice();
   
   const { supportedGPUs } = useBitLeaseGPU();
   const { price: selectedGPUPrice, isLoading: isPriceLoading } = useBitLeaseGPUPrice(selectedGPU);
   const { createLease, isCreatingLease: isTransactionPending, isConfirming: isLeaseConfirming, isSuccess: isLeaseSuccess, hash: leaseHash } = useBitLeaseLeases();
   const { bbtcBalance: stakingBalance } = useBitLeaseStaking();
-  const { borrow, repay, approveBBTC, updateBTCPrice, bbtcAllowance, userBBTCBalance, poolUSDCBalance, btcPrice: oracleBtcPrice, lastUpdated, isOracleStale, isPending: isBorrowPending, isConfirming: isBorrowConfirming, isSuccess: isBorrowSuccess, error, hash: borrowHash, userDebt, userCollateral } = useBitLeaseLending();
+  const { borrow, repay, approveBBTC, bbtcAllowance, userBBTCBalance, poolUSDCBalance, btcPrice: oracleBtcPrice, btcPriceUSD, lastUpdated, isOracleStale, oracleSourceCount, isPending: isBorrowPending, isConfirming: isBorrowConfirming, isSuccess: isBorrowSuccess, error, hash: borrowHash, userDebt, userCollateral } = useBitLeaseLending();
 
   useEffect(() => {
     setIsVisible(true);
