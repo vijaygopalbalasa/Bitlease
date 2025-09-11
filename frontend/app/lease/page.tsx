@@ -478,12 +478,30 @@ export default function LeasePage() {
                       ) : (
                         <Button
                           onClick={() => {
+                            console.log('Borrow button clicked:', {
+                              borrowAmount,
+                              realBtcPrice,
+                              isBtcPriceLoading,
+                              hasValidInputs: borrowAmount && realBtcPrice && realBtcPrice > 0
+                            });
+                            
                             if (borrowAmount && realBtcPrice && realBtcPrice > 0) {
                               const collateralAmount = parseUnits(borrowAmount, 8);
                               // Calculate max USDC based on 50% LTV using live BTC price
                               const maxUsdcValue = (parseFloat(borrowAmount) * realBtcPrice) * 0.5;
                               const borrowUsdcAmount = parseUnits(maxUsdcValue.toFixed(6), 6);
+                              console.log('Calling borrow with:', {
+                                collateralAmount: collateralAmount.toString(),
+                                borrowUsdcAmount: borrowUsdcAmount.toString(),
+                                maxUsdcValue
+                              });
                               borrow(collateralAmount, borrowUsdcAmount);
+                            } else {
+                              console.log('Borrow conditions not met:', {
+                                hasBorrowAmount: !!borrowAmount,
+                                hasRealBtcPrice: !!realBtcPrice,
+                                isBtcPriceValid: realBtcPrice > 0
+                              });
                             }
                           }}
                           disabled={isBorrowPending || isBorrowConfirming || !borrowAmount || parseFloat(borrowAmount) <= 0 || !realBtcPrice || isBtcPriceLoading}
