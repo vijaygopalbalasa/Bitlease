@@ -483,8 +483,27 @@ export function useBitLeaseLending() {
   const { address } = useAccount()
   const { writeContract, data: hash, isPending, error } = useWriteContract()
 
-  // Professional BTC price oracle
+  // Read BTC price directly from contract oracle to ensure consistency
+  const { data: contractBTCPrice } = useReadContract({
+    address: CONTRACTS.BTCPriceOracle,
+    abi: [
+      {
+        inputs: [],
+        name: "getLatestPrice",
+        outputs: [{ name: "", type: "uint256" }],
+        stateMutability: "view",
+        type: "function"
+      }
+    ],
+    functionName: 'getLatestPrice',
+    query: { enabled: true }
+  })
+
+  // Professional BTC price oracle (for display purposes)
   const { price: btcPriceUSD, priceInWei: btcPrice, lastUpdated, isStale, error: priceError, sourceCount } = useProfessionalBTCPrice()
+  
+  // Use contract price for calculations, API price for display
+  const calculationBTCPrice = contractBTCPrice || btcPrice
 
   // Read user debt
   const { data: userDebt } = useReadContract({
@@ -573,8 +592,8 @@ export function useBitLeaseLending() {
       return
     }
     
-    // Calculate expected LTV for debugging
-    const expectedCollateralValue = btcPrice ? (collateralAmount * btcPrice) / BigInt(1e8) : 0n
+    // Calculate expected LTV using CONTRACT oracle price for accuracy
+    const expectedCollateralValue = calculationBTCPrice ? (collateralAmount * calculationBTCPrice) / BigInt(1e8) : 0n
     const expectedMaxBorrow = expectedCollateralValue ? (expectedCollateralValue * BigInt(5000)) / BigInt(10000) : 0n // 50% LTV
     const ltvCheck = borrowAmount <= expectedMaxBorrow
     
@@ -588,14 +607,18 @@ export function useBitLeaseLending() {
       hasEnoughAllowance: bbtcAllowance ? bbtcAllowance >= collateralAmount : false,
       hasEnoughBalance: userBBTCBalance ? userBBTCBalance >= collateralAmount : false,
       poolHasEnoughLiquidity: poolUSDCBalance ? poolUSDCBalance >= borrowAmount : false,
-      // Professional Oracle debugging
-      btcPrice: btcPrice?.toString(),
-      btcPriceInUSD: btcPriceUSD ? btcPriceUSD.toFixed(2) : 'N/A',
+      // Oracle Price Debugging - Contract vs API
+      contractBTCPrice: contractBTCPrice?.toString(),
+      contractBTCPriceUSD: contractBTCPrice ? (Number(contractBTCPrice) / 1e8).toFixed(2) : 'N/A',
+      apiBTCPrice: btcPrice?.toString(), 
+      apiBTCPriceInUSD: btcPriceUSD ? btcPriceUSD.toFixed(2) : 'N/A',
+      calculationPrice: calculationBTCPrice?.toString(),
+      calculationPriceUSD: calculationBTCPrice ? (Number(calculationBTCPrice) / 1e8).toFixed(2) : 'N/A',
       lastUpdated: lastUpdated?.toString(),
       lastUpdatedDate: lastUpdated ? new Date(lastUpdated * 1000).toISOString() : 'N/A',
       isOracleStale: isStale,
       oracleSourceCount: sourceCount,
-      oracleType: 'Professional Multi-Source',
+      oracleType: contractBTCPrice ? 'Contract Oracle (Primary)' : 'API Fallback',
       // LTV debugging
       expectedCollateralValue: expectedCollateralValue.toString(),
       expectedMaxBorrow: expectedMaxBorrow.toString(),

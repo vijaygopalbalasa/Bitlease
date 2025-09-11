@@ -22,9 +22,9 @@ const PRICE_SOURCES: PriceSource[] = [
     parser: (data) => parseFloat(data.price)
   },
   {
-    name: 'CoinCap',
-    url: 'https://api.coincap.io/v2/assets/bitcoin',
-    parser: (data) => parseFloat(data.data.priceUsd)
+    name: 'CryptoCompare',
+    url: 'https://min-api.cryptocompare.com/data/price?fsym=BTC&tsyms=USD',
+    parser: (data) => parseFloat(data.USD)
   }
 ];
 
