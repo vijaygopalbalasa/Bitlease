@@ -562,7 +562,13 @@ export function useBitLeaseLending() {
 
     // Check if pool has enough USDC liquidity
     if (!poolUSDCBalance || poolUSDCBalance < borrowAmount) {
-      console.error('Insufficient pool liquidity for borrow amount')
+      console.error('Insufficient pool liquidity for borrow amount:', {
+        requested: borrowAmount.toString(),
+        available: poolUSDCBalance?.toString() || '0',
+        requestedUSDC: (Number(borrowAmount) / 1e6).toFixed(2),
+        availableUSDC: poolUSDCBalance ? (Number(poolUSDCBalance) / 1e6).toFixed(2) : '0'
+      })
+      alert(`❌ Insufficient Pool Liquidity\n\nRequested: ${(Number(borrowAmount) / 1e6).toFixed(2)} USDC\nAvailable: ${poolUSDCBalance ? (Number(poolUSDCBalance) / 1e6).toFixed(2) : '0'} USDC\n\nThis is a testnet limitation. The pool needs more USDC liquidity.`)
       return
     }
     

@@ -489,11 +489,14 @@ export default function LeasePage() {
                               const collateralAmount = parseUnits(borrowAmount, 8);
                               // Calculate max USDC based on 50% LTV using live BTC price
                               const maxUsdcValue = (parseFloat(borrowAmount) * realBtcPrice) * 0.5;
-                              const borrowUsdcAmount = parseUnits(maxUsdcValue.toFixed(6), 6);
+                              // For testnet, try a smaller amount if the full amount is too large
+                              const testnetMaxUSDC = Math.min(maxUsdcValue, 1000); // Cap at $1000 for testnet
+                              const borrowUsdcAmount = parseUnits(testnetMaxUSDC.toFixed(6), 6);
                               console.log('Calling borrow with:', {
                                 collateralAmount: collateralAmount.toString(),
                                 borrowUsdcAmount: borrowUsdcAmount.toString(),
-                                maxUsdcValue
+                                maxUsdcValue,
+                                testnetMaxUSDC
                               });
                               borrow(collateralAmount, borrowUsdcAmount);
                             } else {
