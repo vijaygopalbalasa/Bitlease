@@ -33,6 +33,15 @@ export default function LeasePage() {
     address,
     token: CONTRACTS.USDC,
   });
+  
+  // Use professional multi-source BTC price oracle
+  const { price: realBtcPrice, isLoading: isBtcPriceLoading, error: btcPriceError } = useProfessionalBTCPrice();
+  
+  const { supportedGPUs } = useBitLeaseGPU();
+  const { price: selectedGPUPrice, isLoading: isPriceLoading } = useBitLeaseGPUPrice(selectedGPU);
+  const { createLease, isCreatingLease: isTransactionPending, isConfirming: isLeaseConfirming, isSuccess: isLeaseSuccess, hash: leaseHash } = useBitLeaseLeases();
+  const { bbtcBalance: stakingBalance } = useBitLeaseStaking();
+  const { borrow, repay, approveBBTC, bbtcAllowance, userBBTCBalance, poolUSDCBalance, btcPrice: oracleBtcPrice, btcPriceUSD, lastUpdated, isOracleStale, oracleSourceCount, isPending: isBorrowPending, isConfirming: isBorrowConfirming, isSuccess: isBorrowSuccess, error, hash: borrowHash, userDebt, userCollateral } = useBitLeaseLending();
 
   // Refresh USDC balance after successful borrow
   useEffect(() => {
@@ -45,15 +54,6 @@ export default function LeasePage() {
       return () => clearTimeout(timer);
     }
   }, [isBorrowSuccess, borrowHash, refetchUSDCBalance]);
-  
-  // Use professional multi-source BTC price oracle
-  const { price: realBtcPrice, isLoading: isBtcPriceLoading, error: btcPriceError } = useProfessionalBTCPrice();
-  
-  const { supportedGPUs } = useBitLeaseGPU();
-  const { price: selectedGPUPrice, isLoading: isPriceLoading } = useBitLeaseGPUPrice(selectedGPU);
-  const { createLease, isCreatingLease: isTransactionPending, isConfirming: isLeaseConfirming, isSuccess: isLeaseSuccess, hash: leaseHash } = useBitLeaseLeases();
-  const { bbtcBalance: stakingBalance } = useBitLeaseStaking();
-  const { borrow, repay, approveBBTC, bbtcAllowance, userBBTCBalance, poolUSDCBalance, btcPrice: oracleBtcPrice, btcPriceUSD, lastUpdated, isOracleStale, oracleSourceCount, isPending: isBorrowPending, isConfirming: isBorrowConfirming, isSuccess: isBorrowSuccess, error, hash: borrowHash, userDebt, userCollateral } = useBitLeaseLending();
 
   useEffect(() => {
     setIsVisible(true);
