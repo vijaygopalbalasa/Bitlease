@@ -383,7 +383,7 @@ export function useBitLeaseStaking() {
   }
 
   return {
-    bbtcBalance: bbtcBalance ? formatUnits(bbtcBalance as bigint, 8) : '0',
+    bbtcBalance: bbtcBalance ? formatUnits(bbtcBalance as bigint, 18) : '0', // Fixed: bBTC has 18 decimals
     exchangeRate: exchangeRate ? formatUnits(exchangeRate as bigint, 18) : '1',
     allowance: allowance || 0n,
     deposit,

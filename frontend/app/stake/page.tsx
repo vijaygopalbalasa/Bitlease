@@ -537,7 +537,7 @@ export default function StakePage() {
                     <Button
                       onClick={() => {
                         if (stakeAmount) {
-                          const amount = parseUnits(stakeAmount, 8);
+                          const amount = parseUnits(stakeAmount, 18); // Fixed: bBTC has 18 decimals
                           withdraw(amount);
                         }
                       }}
