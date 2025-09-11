@@ -210,6 +210,44 @@ const MockWBTCABI = [
   }
 ] as const
 
+const MockUSDCABI = [
+  {
+    inputs: [],
+    name: "faucet",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function"
+  },
+  {
+    inputs: [{ name: "account", type: "address" }],
+    name: "balanceOf", 
+    outputs: [{ name: "", type: "uint256" }],
+    stateMutability: "view",
+    type: "function"
+  },
+  {
+    inputs: [{ name: "spender", type: "address" }, { name: "amount", type: "uint256" }],
+    name: "approve",
+    outputs: [{ name: "", type: "bool" }],
+    stateMutability: "nonpayable",
+    type: "function"
+  },
+  {
+    inputs: [{ name: "owner", type: "address" }, { name: "spender", type: "address" }],
+    name: "allowance",
+    outputs: [{ name: "", type: "uint256" }],
+    stateMutability: "view",
+    type: "function"
+  },
+  {
+    inputs: [{ name: "to", type: "address" }, { name: "amount", type: "uint256" }],
+    name: "transfer",
+    outputs: [{ name: "", type: "bool" }],
+    stateMutability: "nonpayable",
+    type: "function"
+  }
+] as const
+
 export function useWBTCFaucet() {
   const { writeContract, data: hash, isPending } = useWriteContract()
   
@@ -227,6 +265,50 @@ export function useWBTCFaucet() {
 
   return {
     claimWBTC,
+    isClaiming: isPending,
+    isConfirming,
+    isSuccess,
+    hash
+  }
+}
+
+export function useUSDCFaucet() {
+  const { writeContract, data: hash, isPending } = useWriteContract()
+  const { address } = useAccount()
+  
+  const claimUSDC = () => {
+    (writeContract as any)({
+      address: CONTRACTS.USDC,
+      abi: MockUSDCABI,
+      functionName: 'faucet'
+    })
+  }
+
+  // Function to transfer USDC to lending pool for liquidity
+  const addLiquidityToPool = (amount: bigint) => {
+    if (!address) return
+    (writeContract as any)({
+      address: CONTRACTS.USDC,
+      abi: MockUSDCABI,
+      functionName: 'transfer',
+      args: [CONTRACTS.LendingPool, amount]
+    })
+  }
+
+  // Combined function: claim USDC and add to pool
+  const claimAndAddLiquidity = async () => {
+    // First claim USDC
+    claimUSDC()
+  }
+
+  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
+    hash,
+  })
+
+  return {
+    claimUSDC,
+    addLiquidityToPool,
+    claimAndAddLiquidity,
     isClaiming: isPending,
     isConfirming,
     isSuccess,

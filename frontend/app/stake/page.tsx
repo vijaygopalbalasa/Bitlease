@@ -7,7 +7,7 @@ import { ArrowRightIcon, CheckCircleIcon, InformationCircleIcon, BoltIcon, Shiel
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { Input } from '../../components/ui/Input';
-import { useBitLeaseStaking, useWBTCFaucet } from '../../lib/hooks/useBitLease';
+import { useBitLeaseStaking, useWBTCFaucet, useUSDCFaucet } from '../../lib/hooks/useBitLease';
 import { CONTRACTS } from '../../lib/contracts';
 import Link from 'next/link';
 
@@ -45,6 +45,14 @@ export default function StakePage() {
     isConfirming: isFaucetConfirming,
     isSuccess: isFaucetSuccess
   } = useWBTCFaucet();
+
+  const {
+    claimUSDC,
+    addLiquidityToPool,
+    isClaiming: isClaimingUSDC,
+    isConfirming: isUSDCConfirming,
+    isSuccess: isUSDCSuccess
+  } = useUSDCFaucet();
 
   useEffect(() => {
     setIsVisible(true);
@@ -299,6 +307,68 @@ export default function StakePage() {
                         <CheckCircleIcon className="h-6 w-6 text-green-400 mr-3" />
                         <span className="text-green-300 font-semibold">
                           Successfully received 10 WBTC! Refresh to see updated balance.
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* USDC Faucet Section for Pool Liquidity */}
+                <div className="mb-8 p-6 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 rounded-2xl border border-yellow-500/30">
+                  <div className="flex justify-between items-center mb-4">
+                    <span className="text-yellow-300 font-semibold">Testnet Pool Liquidity</span>
+                    <span className="text-orange-300 font-semibold">Admin Functions</span>
+                  </div>
+                  
+                  <div className="text-sm text-yellow-300 mb-4 font-medium">
+                    ⚠️ Pool has 0 USDC liquidity. Add liquidity to enable borrowing for all users.
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Claim USDC Button */}
+                    <Button
+                      onClick={claimUSDC}
+                      disabled={isClaimingUSDC || isUSDCConfirming}
+                      className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white py-3 rounded-xl font-semibold shadow-lg transform hover:scale-105 transition-all duration-300"
+                    >
+                      {isClaimingUSDC || isUSDCConfirming ? (
+                        <div className="flex items-center justify-center">
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                          {isClaimingUSDC ? 'Getting USDC...' : 'Confirming...'}
+                        </div>
+                      ) : (
+                        <span className="flex items-center justify-center">
+                          💰 Get 10,000 Test USDC
+                        </span>
+                      )}
+                    </Button>
+
+                    {/* Add Liquidity Button */}
+                    <Button
+                      onClick={() => addLiquidityToPool(parseUnits("5000", 6))} // Add 5000 USDC to pool
+                      disabled={isClaimingUSDC || isUSDCConfirming}
+                      className="bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white py-3 rounded-xl font-semibold shadow-lg transform hover:scale-105 transition-all duration-300"
+                    >
+                      {isClaimingUSDC || isUSDCConfirming ? (
+                        <div className="flex items-center justify-center">
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                          Adding Liquidity...
+                        </div>
+                      ) : (
+                        <span className="flex items-center justify-center">
+                          🏦 Add 5,000 USDC to Pool
+                        </span>
+                      )}
+                    </Button>
+                  </div>
+
+                  {/* USDC Success message */}
+                  {isUSDCSuccess && (
+                    <div className="border-t border-green-500/30 pt-4 mt-4">
+                      <div className="flex items-center p-4 bg-green-500/20 rounded-2xl border border-green-500/30">
+                        <CheckCircleIcon className="h-6 w-6 text-green-400 mr-3" />
+                        <span className="text-green-300 font-semibold">
+                          USDC transaction successful! Pool liquidity updated.
                         </span>
                       </div>
                     </div>
