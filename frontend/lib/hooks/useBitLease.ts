@@ -3,6 +3,7 @@ import { useAccount, useReadContract, useWriteContract, useWaitForTransactionRec
 import { parseUnits, formatUnits } from 'viem'
 import { useEffect } from 'react'
 import { CONTRACTS } from '../contracts'
+import { useProfessionalBTCPrice } from './usePriceOracle'
 
 // ABI imports - these would be generated from your contracts
 const bBTCABI = [
@@ -482,6 +483,9 @@ export function useBitLeaseLending() {
   const { address } = useAccount()
   const { writeContract, data: hash, isPending, error } = useWriteContract()
 
+  // Professional BTC price oracle
+  const { price: btcPriceUSD, priceInWei: btcPrice, lastUpdated, isStale, error: priceError, sourceCount } = useProfessionalBTCPrice()
+
   // Read user debt
   const { data: userDebt } = useReadContract({
     address: CONTRACTS.LendingPool,
@@ -544,37 +548,7 @@ export function useBitLeaseLending() {
     query: { enabled: true }
   })
 
-  // Read BTC price from oracle
-  const { data: btcPrice } = useReadContract({
-    address: CONTRACTS.BTCPriceOracle,
-    abi: [
-      {
-        inputs: [],
-        name: "getBTCPrice",
-        outputs: [{ name: "", type: "uint256" }],
-        stateMutability: "view",
-        type: "function"
-      }
-    ],
-    functionName: 'getBTCPrice',
-    query: { enabled: true }
-  })
-
-  // Read last updated timestamp from oracle
-  const { data: lastUpdated } = useReadContract({
-    address: CONTRACTS.BTCPriceOracle,
-    abi: [
-      {
-        inputs: [],
-        name: "getLastUpdated",
-        outputs: [{ name: "", type: "uint256" }],
-        stateMutability: "view",
-        type: "function"
-      }
-    ],
-    functionName: 'getLastUpdated',
-    query: { enabled: true }
-  })
+  // BTC price now comes from professional oracle above
 
   // Approve bBTC for LendingPool
   const approveBBTC = (amount: bigint) => {
@@ -592,8 +566,12 @@ export function useBitLeaseLending() {
 
   // Borrow function
   const borrow = (collateralAmount: bigint, borrowAmount: bigint) => {
-    const currentTime = Math.floor(Date.now() / 1000)
-    const isOracleStale = lastUpdated ? (currentTime - Number(lastUpdated)) > 3600 : false
+    // Check professional oracle status
+    if (priceError) {
+      console.error('❌ VALIDATION FAILED: Price oracle error', priceError)
+      alert('❌ Unable to fetch BTC price from oracles. Please try again.')
+      return
+    }
     
     // Calculate expected LTV for debugging
     const expectedCollateralValue = btcPrice ? (collateralAmount * btcPrice) / BigInt(1e8) : 0n
@@ -610,15 +588,14 @@ export function useBitLeaseLending() {
       hasEnoughAllowance: bbtcAllowance ? bbtcAllowance >= collateralAmount : false,
       hasEnoughBalance: userBBTCBalance ? userBBTCBalance >= collateralAmount : false,
       poolHasEnoughLiquidity: poolUSDCBalance ? poolUSDCBalance >= borrowAmount : false,
-      // Oracle debugging
+      // Professional Oracle debugging
       btcPrice: btcPrice?.toString(),
-      btcPriceInUSD: btcPrice ? (Number(btcPrice) / 1e8).toFixed(2) : 'N/A',
+      btcPriceInUSD: btcPriceUSD ? btcPriceUSD.toFixed(2) : 'N/A',
       lastUpdated: lastUpdated?.toString(),
-      lastUpdatedDate: lastUpdated ? new Date(Number(lastUpdated) * 1000).toISOString() : 'N/A',
-      currentTime: currentTime.toString(),
-      timeSinceUpdate: lastUpdated ? (currentTime - Number(lastUpdated)) : 'N/A',
-      isOracleStale: isOracleStale,
-      oracleContract: CONTRACTS.BTCPriceOracle,
+      lastUpdatedDate: lastUpdated ? new Date(lastUpdated * 1000).toISOString() : 'N/A',
+      isOracleStale: isStale,
+      oracleSourceCount: sourceCount,
+      oracleType: 'Professional Multi-Source',
       // LTV debugging
       expectedCollateralValue: expectedCollateralValue.toString(),
       expectedMaxBorrow: expectedMaxBorrow.toString(),
@@ -668,15 +645,14 @@ export function useBitLeaseLending() {
       return
     }
     
-    // Check if oracle is stale (contract will revert if > 1 hour)
-    if (isOracleStale) {
-      console.error('❌ VALIDATION FAILED: BTC oracle price is stale', {
+    // Check if professional oracle is stale (>5 minutes)
+    if (isStale) {
+      console.error('❌ VALIDATION FAILED: BTC price is stale', {
         lastUpdated: lastUpdated?.toString(),
-        currentTime: currentTime.toString(),
-        timeSinceUpdate: lastUpdated ? (currentTime - Number(lastUpdated)) : 'N/A',
-        isStale: isOracleStale
+        isStale: isStale,
+        sourceCount: sourceCount
       })
-      alert('⚠️ BTC Oracle Price is Stale\n\nThe BTC price oracle hasn\'t been updated in over an hour. The borrowing transaction will fail.\n\nPlease click "Update BTC Price" first, then try borrowing again.')
+      alert('⚠️ BTC Price Data is Stale\n\nThe BTC price hasn\'t been updated recently. Please wait a moment and try again.')
       return
     }
     
@@ -717,22 +693,7 @@ export function useBitLeaseLending() {
     })
   }
 
-  // Update BTC oracle price function
-  const updateBTCPrice = async (newPriceUSD: number = 60000) => {
-    try {
-      const priceWith8Decimals = parseUnits(newPriceUSD.toString(), 8)
-      // console.log(`Updating BTC oracle price to $${newPriceUSD}...`)
-      
-      (writeContract as any)({
-        address: CONTRACTS.BTCPriceOracle,
-        abi: BTCPriceOracleABI,
-        functionName: 'updatePrice',
-        args: [priceWith8Decimals]
-      })
-    } catch (error) {
-      // console.error('Failed to update BTC price:', error)
-    }
-  }
+  // Professional oracle updates automatically
 
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
     hash,
@@ -757,12 +718,13 @@ export function useBitLeaseLending() {
     userBBTCBalance: userBBTCBalance || 0n,
     poolUSDCBalance: poolUSDCBalance || 0n,
     btcPrice: btcPrice || 0n,
-    lastUpdated: lastUpdated || 0n,
-    isOracleStale: lastUpdated ? (Math.floor(Date.now() / 1000) - Number(lastUpdated)) > 3600 : false,
+    btcPriceUSD: btcPriceUSD || 0,
+    lastUpdated: lastUpdated || 0,
+    isOracleStale: isStale,
+    oracleSourceCount: sourceCount,
     borrow,
     repay,
     approveBBTC,
-    updateBTCPrice,
     isPending,
     isConfirming,
     isSuccess,
