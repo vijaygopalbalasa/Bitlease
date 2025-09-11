@@ -518,64 +518,64 @@ export function useBitLeaseLending() {
     const expectedMaxBorrow = expectedCollateralValue ? (expectedCollateralValue * BigInt(5000)) / BigInt(10000) : 0n // 50% LTV
     const ltvCheck = borrowAmount <= expectedMaxBorrow
     
-    // console.log('Attempting to borrow:', {
-    //   collateralAmount: collateralAmount.toString(),
-    //   borrowAmount: borrowAmount.toString(),
-    //   lendingPool: CONTRACTS.LendingPool,
-    //   currentAllowance: bbtcAllowance?.toString(),
-    //   userBalance: userBBTCBalance?.toString(),
-    //   poolUSDCBalance: poolUSDCBalance?.toString(),
-    //   hasEnoughAllowance: bbtcAllowance ? bbtcAllowance >= collateralAmount : false,
-    //   hasEnoughBalance: userBBTCBalance ? userBBTCBalance >= collateralAmount : false,
-    //   poolHasEnoughLiquidity: poolUSDCBalance ? poolUSDCBalance >= borrowAmount : false,
-    //   // Oracle debugging
-    //   btcPrice: btcPrice?.toString(),
-    //   btcPriceInUSD: btcPrice ? (Number(btcPrice) / 1e8).toFixed(2) : 'N/A',
-    //   lastUpdated: lastUpdated?.toString(),
-    //   lastUpdatedDate: lastUpdated ? new Date(Number(lastUpdated) * 1000).toISOString() : 'N/A',
-    //   currentTime: currentTime.toString(),
-    //   timeSinceUpdate: lastUpdated ? (currentTime - Number(lastUpdated)) : 'N/A',
-    //   isOracleStale: isOracleStale,
-    //   oracleContract: CONTRACTS.BTCPriceOracle,
-    //   // LTV debugging
-    //   expectedCollateralValue: expectedCollateralValue.toString(),
-    //   expectedMaxBorrow: expectedMaxBorrow.toString(),
-    //   ltvRatio: expectedCollateralValue > 0 ? ((borrowAmount * BigInt(10000)) / expectedCollateralValue).toString() : 'N/A',
-    //   ltvCheck: ltvCheck,
-    //   // User position debugging
-    //   currentDebt: userDebt?.toString() || '0',
-    //   currentCollateral: userCollateral?.toString() || '0',
-    //   currentHealthFactor: healthFactor?.toString() || 'N/A'
-    // })
+    console.log('Attempting to borrow:', {
+      collateralAmount: collateralAmount.toString(),
+      borrowAmount: borrowAmount.toString(),
+      lendingPool: CONTRACTS.LendingPool,
+      currentAllowance: bbtcAllowance?.toString(),
+      userBalance: userBBTCBalance?.toString(),
+      poolUSDCBalance: poolUSDCBalance?.toString(),
+      hasEnoughAllowance: bbtcAllowance ? bbtcAllowance >= collateralAmount : false,
+      hasEnoughBalance: userBBTCBalance ? userBBTCBalance >= collateralAmount : false,
+      poolHasEnoughLiquidity: poolUSDCBalance ? poolUSDCBalance >= borrowAmount : false,
+      // Oracle debugging
+      btcPrice: btcPrice?.toString(),
+      btcPriceInUSD: btcPrice ? (Number(btcPrice) / 1e8).toFixed(2) : 'N/A',
+      lastUpdated: lastUpdated?.toString(),
+      lastUpdatedDate: lastUpdated ? new Date(Number(lastUpdated) * 1000).toISOString() : 'N/A',
+      currentTime: currentTime.toString(),
+      timeSinceUpdate: lastUpdated ? (currentTime - Number(lastUpdated)) : 'N/A',
+      isOracleStale: isOracleStale,
+      oracleContract: CONTRACTS.BTCPriceOracle,
+      // LTV debugging
+      expectedCollateralValue: expectedCollateralValue.toString(),
+      expectedMaxBorrow: expectedMaxBorrow.toString(),
+      ltvRatio: expectedCollateralValue > 0 ? ((borrowAmount * BigInt(10000)) / expectedCollateralValue).toString() : 'N/A',
+      ltvCheck: ltvCheck,
+      // User position debugging
+      currentDebt: userDebt?.toString() || '0',
+      currentCollateral: userCollateral?.toString() || '0',
+      currentHealthFactor: healthFactor?.toString() || 'N/A'
+    })
     
     // Check if user has enough balance
     if (!userBBTCBalance || userBBTCBalance < collateralAmount) {
-      // console.error('Insufficient bBTC balance for collateral')
+      console.error('Insufficient bBTC balance for collateral')
       return
     }
     
     // Check if allowance is sufficient
     if (!bbtcAllowance || bbtcAllowance < collateralAmount) {
-      // console.error('Insufficient bBTC allowance for collateral')
+      console.error('Insufficient bBTC allowance for collateral')
       return
     }
 
     // Check if pool has enough USDC liquidity
     if (!poolUSDCBalance || poolUSDCBalance < borrowAmount) {
-      // console.error('Insufficient pool liquidity for borrow amount')
+      console.error('Insufficient pool liquidity for borrow amount')
       return
     }
     
     // Check if oracle is stale (contract will revert if > 1 hour)
     if (isOracleStale) {
-      // console.error('BTC oracle price is stale (>1 hour old), transaction will fail. Please update the oracle first.')
+      console.error('BTC oracle price is stale (>1 hour old), transaction will fail. Please update the oracle first.')
       alert('⚠️ BTC Oracle Price is Stale\n\nThe BTC price oracle hasn\'t been updated in over an hour. The borrowing transaction will fail.\n\nPlease click "Update BTC Price" first, then try borrowing again.')
       return
     }
     
     // Check LTV before transaction
     if (!ltvCheck && expectedCollateralValue > 0) {
-      // console.error('LTV check failed - borrow amount exceeds 50% of collateral value')
+      console.error('LTV check failed - borrow amount exceeds 50% of collateral value')
       return
     }
     
