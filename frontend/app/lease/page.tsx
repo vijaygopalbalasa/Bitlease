@@ -29,10 +29,22 @@ export default function LeasePage() {
     token: CONTRACTS.bBTC,
   });
   
-  const { data: usdcBalance } = useBalance({
+  const { data: usdcBalance, refetch: refetchUSDCBalance } = useBalance({
     address,
     token: CONTRACTS.USDC,
   });
+
+  // Refresh USDC balance after successful borrow
+  useEffect(() => {
+    if (isBorrowSuccess && borrowHash) {
+      // Wait a bit for the transaction to be mined, then refresh
+      const timer = setTimeout(() => {
+        refetchUSDCBalance();
+        console.log('🔄 Refreshing USDC balance after successful borrow');
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [isBorrowSuccess, borrowHash, refetchUSDCBalance]);
   
   // Use professional multi-source BTC price oracle
   const { price: realBtcPrice, isLoading: isBtcPriceLoading, error: btcPriceError } = useProfessionalBTCPrice();

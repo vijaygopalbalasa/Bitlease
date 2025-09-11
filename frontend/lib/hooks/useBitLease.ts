@@ -676,6 +676,14 @@ export function useBitLeaseLending() {
     console.log('🚀 All validations passed - proceeding with borrow transaction...')
     
     try {
+      console.log('📞 Calling writeContract with:', {
+        address: CONTRACTS.LendingPool,
+        functionName: 'borrow',
+        args: [collateralAmount.toString(), borrowAmount.toString()],
+        collateralAmountBTC: (Number(collateralAmount) / 1e8).toFixed(8) + ' bBTC',
+        borrowAmountUSDC: (Number(borrowAmount) / 1e6).toFixed(2) + ' USDC'
+      });
+      
       (writeContract as any)({
         address: CONTRACTS.LendingPool,
         abi: LendingPoolABI,
@@ -700,9 +708,26 @@ export function useBitLeaseLending() {
 
   // Professional oracle updates automatically
 
-  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
+  const { isLoading: isConfirming, isSuccess, isError, error: receiptError } = useWaitForTransactionReceipt({
     hash,
   })
+
+  // Enhanced transaction monitoring for lending
+  useEffect(() => {
+    if (hash) {
+      console.log('🔍 Monitoring lending transaction:', hash);
+    }
+    if (isConfirming) {
+      console.log('⏳ Lending transaction confirming...');
+    }
+    if (isSuccess) {
+      console.log('✅ Lending transaction confirmed successfully!', { hash });
+    }
+    if (isError) {
+      console.error('❌ Lending transaction failed:', receiptError);
+      alert('❌ Transaction Failed\n\nThe borrowing transaction was rejected by the blockchain. Please check the transaction details.');
+    }
+  }, [hash, isConfirming, isSuccess, isError, receiptError])
 
   // Refetch allowance after successful transactions
   useEffect(() => {
