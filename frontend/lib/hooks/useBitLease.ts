@@ -632,15 +632,29 @@ export function useBitLeaseLending() {
     
     // Check if user has enough balance
     if (!userBBTCBalance || userBBTCBalance < collateralAmount) {
-      console.error('Insufficient bBTC balance for collateral')
+      console.error('❌ VALIDATION FAILED: Insufficient bBTC balance for collateral', {
+        userBBTCBalance: userBBTCBalance?.toString(),
+        requiredCollateral: collateralAmount.toString(),
+        hasBalance: !!userBBTCBalance,
+        hasEnoughBalance: userBBTCBalance ? userBBTCBalance >= collateralAmount : false
+      })
+      alert('❌ Insufficient bBTC balance for collateral')
       return
     }
     
     // Check if allowance is sufficient
     if (!bbtcAllowance || bbtcAllowance < collateralAmount) {
-      console.error('Insufficient bBTC allowance for collateral')
+      console.error('❌ VALIDATION FAILED: Insufficient bBTC allowance for collateral', {
+        bbtcAllowance: bbtcAllowance?.toString(),
+        requiredCollateral: collateralAmount.toString(),
+        hasAllowance: !!bbtcAllowance,
+        hasEnoughAllowance: bbtcAllowance ? bbtcAllowance >= collateralAmount : false
+      })
+      alert('❌ Please approve bBTC for lending pool first')
       return
     }
+    
+    console.log('✅ Balance and allowance checks passed')
 
     // Check if pool has enough USDC liquidity
     if (!poolUSDCBalance || poolUSDCBalance < borrowAmount) {
@@ -656,16 +670,34 @@ export function useBitLeaseLending() {
     
     // Check if oracle is stale (contract will revert if > 1 hour)
     if (isOracleStale) {
-      console.error('BTC oracle price is stale (>1 hour old), transaction will fail. Please update the oracle first.')
+      console.error('❌ VALIDATION FAILED: BTC oracle price is stale', {
+        lastUpdated: lastUpdated?.toString(),
+        currentTime: currentTime.toString(),
+        timeSinceUpdate: lastUpdated ? (currentTime - Number(lastUpdated)) : 'N/A',
+        isStale: isOracleStale
+      })
       alert('⚠️ BTC Oracle Price is Stale\n\nThe BTC price oracle hasn\'t been updated in over an hour. The borrowing transaction will fail.\n\nPlease click "Update BTC Price" first, then try borrowing again.')
       return
     }
     
+    console.log('✅ Oracle freshness check passed')
+    
     // Check LTV before transaction
     if (!ltvCheck && expectedCollateralValue > 0) {
-      console.error('LTV check failed - borrow amount exceeds 50% of collateral value')
+      console.error('❌ VALIDATION FAILED: LTV check failed - borrow amount exceeds 50% of collateral value', {
+        expectedCollateralValue: expectedCollateralValue.toString(),
+        expectedMaxBorrow: expectedMaxBorrow.toString(),
+        requestedBorrow: borrowAmount.toString(),
+        ltvRatio: ((borrowAmount * BigInt(10000)) / expectedCollateralValue).toString(),
+        maxLtvAllowed: '5000' // 50%
+      })
+      alert('❌ Borrow amount too high\n\nYou can only borrow up to 50% of your collateral value.')
       return
     }
+    
+    console.log('✅ LTV check passed')
+    
+    console.log('🚀 All validations passed - proceeding with borrow transaction...')
     
     (writeContract as any)({
       address: CONTRACTS.LendingPool,
