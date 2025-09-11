@@ -17,14 +17,14 @@ const PRICE_SOURCES: PriceSource[] = [
     parser: (data) => data.bitcoin.usd
   },
   {
-    name: 'CoinMarketCap',
-    url: 'https://api.coinmarketcap.com/data-api/v3/cryptocurrency/market-pairs/latest?slug=bitcoin&start=1&limit=1&category=all&centerType=all&sort=cmc_rank',
-    parser: (data) => data.data.marketPairs[0]?.price || null
-  },
-  {
     name: 'Binance',
     url: 'https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT',
     parser: (data) => parseFloat(data.price)
+  },
+  {
+    name: 'CoinCap',
+    url: 'https://api.coincap.io/v2/assets/bitcoin',
+    parser: (data) => parseFloat(data.data.priceUsd)
   }
 ];
 
