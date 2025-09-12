@@ -3,7 +3,7 @@ import { useAccount, useReadContract, useWriteContract, useWaitForTransactionRec
 import { parseUnits, formatUnits } from 'viem'
 import { useEffect } from 'react'
 import { CONTRACTS } from '../contracts'
-import { useProfessionalBTCPrice } from './usePriceOracle'
+import { useHybridBTCOracle } from './useHybridBTCOracle'
 
 // ABI imports - these would be generated from your contracts
 const bBTCABI = [
@@ -483,10 +483,10 @@ export function useBitLeaseLending() {
   const { address } = useAccount()
   const { writeContract, data: hash, isPending, error } = useWriteContract()
 
-  // Professional BTC price oracle - Core DAO testnet doesn't have Chainlink support
-  const { price: btcPriceUSD, priceInWei: btcPrice, lastUpdated, isStale, error: priceError, sourceCount } = useProfessionalBTCPrice()
+  // Professional Hybrid BTC Oracle - combines contract + API sources for maximum reliability
+  const { price: btcPriceUSD, priceInWei: btcPrice, lastUpdated, isStale, error: priceError, sourceCount, contractPrice, hybridMode } = useHybridBTCOracle()
   
-  // Use API-based professional oracle for all calculations (no contract oracle available on Core DAO testnet)
+  // Use hybrid oracle price for all calculations (contract-first, API fallback)
   const calculationBTCPrice = btcPrice
 
   // Read user debt
@@ -576,9 +576,9 @@ export function useBitLeaseLending() {
       return
     }
     
-    // Calculate expected LTV using CONTRACT oracle price for accuracy
+    // Calculate expected LTV using HYBRID oracle price for maximum accuracy
     const expectedCollateralValue = calculationBTCPrice ? (collateralAmount * calculationBTCPrice) / BigInt(1e8) : 0n
-    const expectedMaxBorrow = expectedCollateralValue ? (expectedCollateralValue * BigInt(5000)) / BigInt(10000) : 0n // 50% LTV
+    const expectedMaxBorrow = expectedCollateralValue ? (expectedCollateralValue * BigInt(5000)) / BigInt(10000) : 0n // 50% LTV - PROFESSIONAL REQUIREMENT
     const ltvCheck = borrowAmount <= expectedMaxBorrow
     
     console.log('Attempting to borrow:', {
@@ -591,16 +591,19 @@ export function useBitLeaseLending() {
       hasEnoughAllowance: bbtcAllowance ? bbtcAllowance >= collateralAmount : false,
       hasEnoughBalance: userBBTCBalance ? userBBTCBalance >= collateralAmount : false,
       poolHasEnoughLiquidity: poolUSDCBalance ? poolUSDCBalance >= borrowAmount : false,
-      // Professional Oracle Price Debugging
+      // Professional Hybrid Oracle Price Debugging
       btcPrice: btcPrice?.toString(),
       btcPriceInUSD: btcPriceUSD ? btcPriceUSD.toFixed(2) : 'N/A',
+      contractPrice: contractPrice?.toString(),
+      contractPriceUSD: contractPrice ? (Number(contractPrice) / 1e8).toFixed(2) : 'N/A',
       calculationPrice: calculationBTCPrice?.toString(),
       calculationPriceUSD: calculationBTCPrice ? (Number(calculationBTCPrice) / 1e8).toFixed(2) : 'N/A',
       lastUpdated: lastUpdated?.toString(),
       lastUpdatedDate: lastUpdated ? new Date(lastUpdated * 1000).toISOString() : 'N/A',
       isOracleStale: isStale,
       oracleSourceCount: sourceCount,
-      oracleType: 'Professional Multi-Source API Oracle',
+      oracleMode: hybridMode,
+      oracleType: 'Professional Hybrid Oracle (Contract + API)',
       // LTV debugging
       expectedCollateralValue: expectedCollateralValue.toString(),
       expectedMaxBorrow: expectedMaxBorrow.toString(),

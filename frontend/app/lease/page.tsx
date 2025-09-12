@@ -448,16 +448,16 @@ export default function LeasePage() {
                             
                             if (borrowAmount && realBtcPrice && realBtcPrice > 0) {
                               const collateralAmount = parseUnits(borrowAmount, 8);
-                              // Calculate max USDC based on VERY CONSERVATIVE 25% LTV for demo reliability
-                              const maxUsdcValue = (parseFloat(borrowAmount) * realBtcPrice) * 0.25;
-                              // For demo, use extremely safe amount
-                              const demoSafeUSDC = Math.min(maxUsdcValue, 100); // Cap at $100 for demo reliability
-                              const borrowUsdcAmount = parseUnits(demoSafeUSDC.toFixed(6), 6);
+                              // Calculate max USDC based on PROFESSIONAL 50% LTV as required
+                              const maxUsdcValue = (parseFloat(borrowAmount) * realBtcPrice) * 0.50;
+                              // Professional lending with proper 50% LTV
+                              const professionalUSDC = Math.min(maxUsdcValue, 2000); // Professional cap at $2000
+                              const borrowUsdcAmount = parseUnits(professionalUSDC.toFixed(6), 6);
                               console.log('Calling borrow with:', {
                                 collateralAmount: collateralAmount.toString(),
                                 borrowUsdcAmount: borrowUsdcAmount.toString(),
                                 maxUsdcValue,
-                                demoSafeUSDC
+                                professionalUSDC
                               });
                               borrow(collateralAmount, borrowUsdcAmount);
                             } else {
