@@ -73,7 +73,7 @@ export function useContractBTCPrice() {
       const priceWith6Decimals = Math.floor(newPriceUSD * 1e6) // Convert to 6 decimals
       console.log('🔄 Updating fresh BTC Oracle with price:', newPriceUSD)
       
-      writeContract({
+      (writeContract as any)({
         address: CONTRACTS.BTCPriceOracle,
         abi: BTC_ORACLE_ABI, 
         functionName: 'updatePrice',
