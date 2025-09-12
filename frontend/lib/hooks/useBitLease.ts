@@ -488,7 +488,15 @@ export function useBitLeaseLending() {
   const { price: btcPriceUSD, priceInWei: btcPrice, lastUpdated, isStale, error: priceError, sourceCount, contractPrice, hybridMode } = useHybridBTCOracle()
   
   // Contract BTC Oracle - for LTV calculations (must match contract exactly)
-  const { priceInWei: contractBTCPrice, isStale: isContractPriceStale } = useContractBTCPrice()
+  const { 
+    priceInWei: contractBTCPrice, 
+    isStale: isContractPriceStale, 
+    updateContractPrice,
+    isUpdating: isUpdatingPrice,
+    isConfirmingUpdate,
+    updateSuccess,
+    refetch: refetchContractPrice
+  } = useContractBTCPrice()
   
   // CRITICAL: Use contract oracle price for LTV calculations to match smart contract
   const calculationBTCPrice = contractBTCPrice || btcPrice // Fallback to hybrid if contract fails
@@ -572,7 +580,7 @@ export function useBitLeaseLending() {
   }
 
   // Borrow function
-  const borrow = (collateralAmount: bigint, borrowAmount: bigint) => {
+  const borrow = async (collateralAmount: bigint, borrowAmount: bigint) => {
     // Check professional oracle status
     if (priceError) {
       console.error('❌ VALIDATION FAILED: Price oracle error', priceError)
@@ -659,14 +667,21 @@ export function useBitLeaseLending() {
       return
     }
     
-    // Check if contract oracle price is stale (>5 minutes) - this is critical for LTV accuracy
-    if (isContractPriceStale) {
-      console.error('❌ VALIDATION FAILED: Contract BTC price is stale', {
-        contractPriceStale: isContractPriceStale,
-        fallbackToHybrid: !!btcPrice
-      })
-      alert('⚠️ Contract BTC Price Data is Stale\n\nThe contract BTC price needs to be updated for accurate LTV calculations. Please try again in a moment.')
-      return
+    // Auto-update contract oracle if price is stale - this ensures LTV accuracy
+    if (isContractPriceStale && btcPriceUSD) {
+      console.log('🔄 Contract BTC price is stale, auto-updating with latest market price:', btcPriceUSD)
+      alert('🔄 Updating BTC price in contract for accurate calculations. Please confirm the transaction.')
+      
+      try {
+        updateContractPrice(btcPriceUSD)
+        console.log('✅ Price update transaction submitted. Please wait for confirmation before proceeding.')
+        alert('⏳ Price update submitted. Please wait for confirmation, then try borrowing again.')
+        return
+      } catch (error) {
+        console.error('❌ Failed to update contract price:', error)
+        alert('❌ Failed to update contract price. Please try again.')
+        return
+      }
     }
     
     console.log('✅ Oracle freshness check passed')
@@ -762,6 +777,11 @@ export function useBitLeaseLending() {
     poolUSDCBalance: poolUSDCBalance || 0n,
     btcPrice: btcPrice || 0n,
     btcPriceUSD: btcPriceUSD || 0,
+    contractBTCPrice: contractBTCPrice,
+    isContractPriceStale,
+    isUpdatingPrice,
+    isConfirmingUpdate,
+    updateSuccess,
     lastUpdated: lastUpdated || 0,
     isOracleStale: isStale,
     oracleSourceCount: sourceCount,
