@@ -790,16 +790,16 @@ export function useBitLeaseLending() {
     }
   }, [hash, isConfirming, isSuccess, isError, receiptError])
 
-  // Refetch allowance after successful transactions
+  // Refetch bBTC allowance after successful lending transactions (not used currently but kept for consistency)
   useEffect(() => {
     if (isSuccess && hash) {
       // Wait a bit for the transaction to be fully processed
       const timer = setTimeout(() => {
-        refetchAllowance()
+        refetchBBTCAllowance()
       }, 2000)
       return () => clearTimeout(timer)
     }
-  }, [isSuccess, hash, refetchAllowance])
+  }, [isSuccess, hash, refetchBBTCAllowance])
 
   // Refetch bBTC allowance after successful approval
   useEffect(() => {
