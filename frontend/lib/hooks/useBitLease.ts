@@ -864,11 +864,11 @@ export function useBitLeaseCalculations() {
     }
   }
 
-  const calculateRequiredCollateral = (borrowAmountUSDC: string, ltvPercent = 50) => {
+  const calculateRequiredCollateral = (borrowAmountUSDC: string, btcPrice: number, ltvPercent = 50) => {
     const borrowAmount = parseFloat(borrowAmountUSDC)
-    const btcPrice = 64000 // This should come from the BTC oracle
+    const effectiveBtcPrice = btcPrice || 115000 // Fallback to current market price
     const requiredCollateralUSD = borrowAmount / (ltvPercent / 100)
-    const requiredBTC = requiredCollateralUSD / btcPrice
+    const requiredBTC = requiredCollateralUSD / effectiveBtcPrice
     return requiredBTC.toFixed(8)
   }
 
