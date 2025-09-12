@@ -307,13 +307,24 @@ contract LendingPool is ReentrancyGuard, Ownable, Pausable {
     }
     
     /**
-     * @notice Get collateral value in USD (mock implementation)
+     * @notice Get collateral value in USD using price oracle
      */
     function _getCollateralValue(uint256 collateralAmount) internal view returns (uint256) {
-        // Mock price oracle - in production, this would call a real price feed
-        // Assuming 1 bBTC = 1 BTC = $60,000 for testnet
-        uint256 btcPrice = 60000 * 1e6; // $60,000 with 6 decimals (USDC format)
-        return (collateralAmount * btcPrice) / 1e18; // bBTC has 18 decimals
+        // Call the price oracle to get current BTC price
+        (bool success, bytes memory data) = priceOracle.staticcall(
+            abi.encodeWithSignature("getLatestPrice()")
+        );
+        
+        uint256 btcPrice;
+        if (success && data.length >= 32) {
+            btcPrice = abi.decode(data, (uint256));
+        } else {
+            // Fallback to reasonable price if oracle fails (for safety)
+            btcPrice = 60000 * 1e6; // $60,000 with 6 decimals (USDC format)
+        }
+        
+        // bBTC has 8 decimals (like real Bitcoin), convert to USDC value (6 decimals)
+        return (collateralAmount * btcPrice) / 1e8;
     }
     
     /**

@@ -35,27 +35,38 @@ async function main() {
   await oracle.deployed();
   console.log("✅ GPUOracle:", oracle.address);
 
+  // Deploy BTC Price Oracle
+  console.log("\n4. Deploying BTC Price Oracle...");
+  const BTCOracle = await ethers.getContractFactory("BTCOracle");
+  const btcOracle = await BTCOracle.deploy();
+  await btcOracle.deployed();
+  console.log("✅ BTC Oracle:", btcOracle.address);
+  
+  // Set initial BTC price to current market price (~$115k)
+  await btcOracle.updatePrice(ethers.utils.parseUnits("115000", 6)); // $115,000
+  console.log("✅ BTC price set to $115,000");
+
   // Deploy LendingPool  
-  console.log("\n4. Deploying LendingPool...");
+  console.log("\n5. Deploying LendingPool...");
   const LendingPool = await ethers.getContractFactory("LendingPool");
   const lendingPool = await LendingPool.deploy(
     bbtc.address,
     mockUSDC.address,
-    deployer.address, // Mock oracle
+    btcOracle.address, // Use actual BTC oracle instead of deployer address
     deployer.address  // Treasury
   );
   await lendingPool.deployed();
   console.log("✅ LendingPool:", lendingPool.address);
 
   // Deploy LeaseManager
-  console.log("\n5. Deploying LeaseManager...");
+  console.log("\n6. Deploying LeaseManager...");
   const LeaseManager = await ethers.getContractFactory("LeaseManager");
   const leaseManager = await LeaseManager.deploy(lendingPool.address, oracle.address);
   await leaseManager.deployed();
   console.log("✅ LeaseManager:", leaseManager.address);
 
   // Initialize with demo data
-  console.log("\n6. Setting up demo data...");
+  console.log("\n7. Setting up demo data...");
   
   // Mint demo tokens for easy testing
   await mockUSDC.mint(deployer.address, ethers.utils.parseUnits("100000", 6));
@@ -81,6 +92,7 @@ async function main() {
     mockWBTC: mockWBTC.address,
     bBTC: bbtc.address,
     lendingPool: lendingPool.address,
+    btcOracle: btcOracle.address,
     gpuOracle: oracle.address,
     leaseManager: leaseManager.address,
     deployer: deployer.address
