@@ -2,7 +2,7 @@ const { ethers } = require('ethers');
 const fs = require('fs');
 
 // Core DAO Testnet Configuration
-const CORE_RPC_URL = 'https://rpc.test.btcs.network';
+const CORE_RPC_URL = 'https://rpc.test2.btcs.network';
 const PRIVATE_KEY = process.env.PRIVATE_KEY || '0x9af5a3a8cf98ad3e0b63e2e5b5ad6b65a25151ac1d9b6d4b8b8b8b8b8b8b8b8b';
 
 // Pyth Network contract address (placeholder - will be updated when found)
