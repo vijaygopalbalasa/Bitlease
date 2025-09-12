@@ -69,18 +69,14 @@ export function useContractBTCPrice() {
 
   // Update contract price function for fresh oracle
   const updateContractPrice = async (newPriceUSD: number) => {
-    try {
-      const priceWith6Decimals = Math.floor(newPriceUSD * 1e6) // Convert to 6 decimals
-      
-      (writeContract as any)({
-        address: CONTRACTS.BTCPriceOracle,
-        abi: BTC_ORACLE_ABI, 
-        functionName: 'updatePrice',
-        args: [BigInt(priceWith6Decimals)]
-      })
-    } catch (error) {
-      throw error
-    }
+    const priceWith6Decimals = newPriceUSD * 1000000; // Convert to 6 decimals
+    
+    (writeContract as any)({
+      address: CONTRACTS.BTCPriceOracle,
+      abi: BTC_ORACLE_ABI, 
+      functionName: 'updatePrice',
+      args: [BigInt(priceWith6Decimals)]
+    })
   }
 
   return {
