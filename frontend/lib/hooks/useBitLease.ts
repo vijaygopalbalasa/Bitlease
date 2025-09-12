@@ -484,6 +484,19 @@ export function useBitLeaseStaking() {
 export function useBitLeaseLending() {
   const { address } = useAccount()
   const { writeContract, data: hash, isPending, error } = useWriteContract()
+  
+  // Separate writeContract hook for bBTC approval to avoid state conflicts
+  const { 
+    writeContract: writeApprovalContract, 
+    data: approvalHash, 
+    isPending: isApprovalPending, 
+    error: approvalError 
+  } = useWriteContract()
+  
+  // Wait for approval transaction confirmation
+  const { isLoading: isApprovalConfirming, isSuccess: isApprovalSuccess } = useWaitForTransactionReceipt({
+    hash: approvalHash,
+  })
 
   // Professional Hybrid BTC Oracle - for display purposes only
   const { price: btcPriceUSD, priceInWei: btcPrice, lastUpdated, isStale, error: priceError, sourceCount, contractPrice, hybridMode } = useHybridBTCOracle()
@@ -530,7 +543,7 @@ export function useBitLeaseLending() {
   })
 
   // Read bBTC allowance for LendingPool
-  const { data: bbtcAllowance, refetch: refetchAllowance } = useReadContract({
+  const { data: bbtcAllowance, refetch: refetchBBTCAllowance } = useReadContract({
     address: CONTRACTS.bBTC,
     abi: bBTCABI,
     functionName: 'allowance',
@@ -568,16 +581,24 @@ export function useBitLeaseLending() {
 
   // Approve bBTC for LendingPool
   const approveBBTC = (amount: bigint) => {
-    // // console.log('Approving bBTC for LendingPool:', {
-    //   spender: CONTRACTS.LendingPool,
-    //   amount: amount.toString()
-    // })
-    (writeContract as any)({
-      address: CONTRACTS.bBTC,
-      abi: bBTCABI,
-      functionName: 'approve',
-      args: [CONTRACTS.LendingPool, amount]
+    console.log('🔄 Approving bBTC for LendingPool:', {
+      bBTCContract: CONTRACTS.bBTC,
+      spender: CONTRACTS.LendingPool,
+      amount: amount.toString(),
+      address: address
     })
+    
+    try {
+      (writeApprovalContract as any)({
+        address: CONTRACTS.bBTC,
+        abi: bBTCABI,
+        functionName: 'approve',
+        args: [CONTRACTS.LendingPool, amount]
+      })
+    } catch (error) {
+      console.error('❌ Failed to call approveBBTC:', error)
+      throw error
+    }
   }
 
   // Borrow function
@@ -780,6 +801,18 @@ export function useBitLeaseLending() {
     }
   }, [isSuccess, hash, refetchAllowance])
 
+  // Refetch bBTC allowance after successful approval
+  useEffect(() => {
+    if (isApprovalSuccess && approvalHash) {
+      console.log('✅ bBTC approval successful, refetching allowance...')
+      // Wait a bit for the transaction to be fully processed
+      const timer = setTimeout(() => {
+        refetchBBTCAllowance()
+      }, 2000)
+      return () => clearTimeout(timer)
+    }
+  }, [isApprovalSuccess, approvalHash, refetchBBTCAllowance])
+
   return {
     userDebt: userDebt ? formatUnits(userDebt as bigint, 6) : '0',
     userCollateral: userCollateral ? formatUnits(userCollateral as bigint, 8) : '0',
@@ -804,7 +837,13 @@ export function useBitLeaseLending() {
     isConfirming,
     isSuccess,
     error,
-    hash
+    hash,
+    // Separate approval states
+    isApprovalPending,
+    isApprovalConfirming,
+    isApprovalSuccess,
+    approvalError,
+    approvalHash
   }
 }
 

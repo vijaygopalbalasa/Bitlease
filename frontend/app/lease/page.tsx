@@ -41,7 +41,7 @@ export default function LeasePage() {
   const { price: selectedGPUPrice, isLoading: isPriceLoading } = useBitLeaseGPUPrice(selectedGPU);
   const { createLease, isCreatingLease: isTransactionPending, isConfirming: isLeaseConfirming, isSuccess: isLeaseSuccess, hash: leaseHash } = useBitLeaseLeases();
   const { bbtcBalance: stakingBalance } = useBitLeaseStaking();
-  const { borrow, repay, approveBBTC, bbtcAllowance, userBBTCBalance, poolUSDCBalance, btcPrice: oracleBtcPrice, btcPriceUSD, lastUpdated, isOracleStale, oracleSourceCount, isPending: isBorrowPending, isConfirming: isBorrowConfirming, isSuccess: isBorrowSuccess, error, hash: borrowHash, userDebt, userCollateral } = useBitLeaseLending();
+  const { borrow, repay, approveBBTC, bbtcAllowance, userBBTCBalance, poolUSDCBalance, btcPrice: oracleBtcPrice, btcPriceUSD, lastUpdated, isOracleStale, oracleSourceCount, isPending: isBorrowPending, isConfirming: isBorrowConfirming, isSuccess: isBorrowSuccess, error, hash: borrowHash, userDebt, userCollateral, isApprovalPending, isApprovalConfirming, isApprovalSuccess, approvalError, approvalHash } = useBitLeaseLending();
 
   // Refresh USDC balance after successful borrow
   useEffect(() => {
@@ -54,6 +54,25 @@ export default function LeasePage() {
       return () => clearTimeout(timer);
     }
   }, [isBorrowSuccess, borrowHash, refetchUSDCBalance]);
+
+  // Handle successful bBTC approval
+  useEffect(() => {
+    if (isApprovalSuccess && approvalHash) {
+      console.log('✅ bBTC Approval successful!', {
+        hash: approvalHash,
+        explorerLink: `https://scan.test2.btcs.network/tx/${approvalHash}`
+      });
+      // Show success notification or toast here if needed
+    }
+  }, [isApprovalSuccess, approvalHash]);
+
+  // Handle bBTC approval errors
+  useEffect(() => {
+    if (approvalError) {
+      console.error('❌ bBTC Approval failed:', approvalError);
+      // Show error notification or alert here if needed
+    }
+  }, [approvalError]);
 
   useEffect(() => {
     setIsVisible(true);
@@ -425,15 +444,23 @@ export default function LeasePage() {
                     {/* Enhanced Action Buttons */}
                     <div className="space-y-4">
                       {/* Approval Check */}
-                      {borrowAmount && Number(bbtcAllowance || 0n) < parseUnits(borrowAmount, 8) ? (
+                      {borrowAmount && (bbtcAllowance || 0n) < parseUnits(borrowAmount, 8) ? (
                         <Button
-                          onClick={() => approveBBTC(parseUnits('1000', 8))}
-                          disabled={isBorrowPending}
+                          onClick={() => {
+                            const approvalAmount = parseUnits(borrowAmount, 8);
+                            console.log('🔄 Approving bBTC for borrowing:', {
+                              borrowAmount,
+                              approvalAmount: approvalAmount.toString(),
+                              currentAllowance: bbtcAllowance?.toString() || '0'
+                            });
+                            approveBBTC(approvalAmount);
+                          }}
+                          disabled={isApprovalPending || isApprovalConfirming}
                           className="group relative w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white py-4 rounded-2xl text-lg font-bold shadow-xl transform hover:scale-105 transition-all duration-300 overflow-hidden"
                         >
                           <span className="relative z-10 flex items-center justify-center">
-                            {isBorrowPending ? 'Approving...' : 'Approve bBTC Collateral'}
-                            {!isBorrowPending && <ArrowRightIcon className="h-5 w-5 ml-3 transform group-hover:translate-x-2 transition-transform duration-300" />}
+                            {isApprovalPending || isApprovalConfirming ? 'Approving...' : 'Approve bBTC Collateral'}
+                            {!isApprovalPending && !isApprovalConfirming && <ArrowRightIcon className="h-5 w-5 ml-3 transform group-hover:translate-x-2 transition-transform duration-300" />}
                           </span>
                         </Button>
                       ) : (
