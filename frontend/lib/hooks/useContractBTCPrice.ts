@@ -72,7 +72,7 @@ export function useContractBTCPrice() {
         abi: BTC_ORACLE_ABI,
         functionName: 'updatePrice',
         args: [newPriceWithDecimals]
-      })
+      } as any)
     } catch (error) {
       console.error('❌ Failed to update contract price:', error)
       throw error
