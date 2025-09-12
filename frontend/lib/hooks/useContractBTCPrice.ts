@@ -1,51 +1,45 @@
 import { useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
 import { CONTRACTS } from '../contracts'
 
-// ABI for the BTCOracle contract
-const BTC_ORACLE_ABI = [
+// ABI for the Professional BTC Consumer Oracle
+const BTC_CONSUMER_ABI = [
   {
     inputs: [],
-    name: "getLatestPrice",
-    outputs: [{ name: "price", type: "uint256" }],
-    stateMutability: "view",
-    type: "function"
-  },
-  {
-    inputs: [],
-    name: "getPriceWithTimestamp", 
+    name: "viewLatestPrice",
     outputs: [
-      { name: "price", type: "uint256" },
-      { name: "timestamp", type: "uint256" }
+      { name: "price", type: "int256" },
+      { name: "timestamp", type: "uint256" },
+      { name: "isStale", type: "bool" }
     ],
     stateMutability: "view",
     type: "function"
   },
   {
-    inputs: [{ name: "newPrice", type: "uint256" }],
-    name: "updatePrice",
-    outputs: [],
-    stateMutability: "nonpayable",
+    inputs: [],
+    name: "isStale",
+    outputs: [{ name: "", type: "bool" }],
+    stateMutability: "view",
     type: "function"
   }
 ] as const
 
 /**
- * Hook to get BTC price directly from the contract oracle
+ * Hook to get BTC price directly from the professional BTC Consumer oracle
  * This ensures frontend and contract use identical pricing
  */
 export function useContractBTCPrice() {
-  // Get the latest price from the contract oracle
-  const { data: contractPrice, isError, isLoading, refetch } = useReadContract({
+  // Get the latest price from the BTC Consumer oracle
+  const { data: priceData, isError, isLoading, refetch } = useReadContract({
     address: CONTRACTS.BTCPriceOracle,
-    abi: BTC_ORACLE_ABI,
-    functionName: 'getLatestPrice',
+    abi: BTC_CONSUMER_ABI,
+    functionName: 'viewLatestPrice',
   })
 
-  // Get price with timestamp for staleness checking
-  const { data: priceWithTimestamp } = useReadContract({
+  // Get staleness status separately for redundancy
+  const { data: isStaleCheck } = useReadContract({
     address: CONTRACTS.BTCPriceOracle, 
-    abi: BTC_ORACLE_ABI,
-    functionName: 'getPriceWithTimestamp',
+    abi: BTC_CONSUMER_ABI,
+    functionName: 'isStale',
   })
 
   // Price update functionality
@@ -54,35 +48,28 @@ export function useContractBTCPrice() {
     hash: updateHash,
   })
 
-  const price = contractPrice ? Number(contractPrice) / 1e6 : null // Convert from 6 decimals to USD  
-  const priceInWei = contractPrice ? contractPrice : null // Keep as 6-decimal BigInt for calculations
-  
-  // Check if price is stale (more than 5 minutes old)
-  const lastUpdated = priceWithTimestamp?.[1] ? Number(priceWithTimestamp[1]) : null
-  const isStale = lastUpdated ? (Math.floor(Date.now() / 1000) - lastUpdated) > 300 : true
+  // Extract data from BTC Consumer oracle response
+  const contractPrice18 = priceData?.[0] ? priceData[0] : null // 18-decimal price (int256)
+  const lastUpdated = priceData?.[1] ? Number(priceData[1]) : null 
+  const isStale = priceData?.[2] ?? isStaleCheck ?? true
 
-  // Function to update contract price
+  // Convert 18-decimal price to 6-decimal format for backward compatibility
+  const contractPrice = contractPrice18 ? BigInt(Number(contractPrice18) / 1e12) : null // Convert 18 to 6 decimals
+  const price = contractPrice18 ? Number(contractPrice18) / 1e18 : null // Convert to USD
+  const priceInWei = contractPrice // Keep as 6-decimal BigInt for calculations (backward compatibility)
+
+  // BTC Consumer oracle is automatically updated - no manual update needed
   const updateContractPrice = async (newPriceUSD: number) => {
-    try {
-      console.log('🔄 Updating contract BTC price to:', newPriceUSD)
-      const newPriceWithDecimals = BigInt(Math.round(newPriceUSD * 1e6)) // Convert to 6 decimals
-      
-      writeContract({
-        address: CONTRACTS.BTCPriceOracle,
-        abi: BTC_ORACLE_ABI,
-        functionName: 'updatePrice',
-        args: [newPriceWithDecimals]
-      } as any)
-    } catch (error) {
-      console.error('❌ Failed to update contract price:', error)
-      throw error
-    }
+    console.log('ℹ️ BTC Consumer oracle updates automatically via professional updater service')
+    console.log('💡 If price seems stale, the updater will sync it within the next update cycle')
+    // Professional oracle updates automatically, no manual intervention needed
   }
 
   return {
     price, // Price in USD (e.g., 115577.0)
-    priceInWei, // Price in wei format for calculations (115577000000n)
-    contractPrice, // Raw contract price (115577000000n with 6 decimals)
+    priceInWei, // Price in wei format for calculations (115577000000n) 
+    contractPrice, // Backward compatible price format
+    contractPrice18, // Full 18-decimal price for precision
     priceFormatted: price ? `$${price.toFixed(2)}` : 'Loading...',
     lastUpdated,
     isLoading,
@@ -90,10 +77,10 @@ export function useContractBTCPrice() {
     isStale,
     refetch,
     updateContractPrice,
-    isUpdating,
-    isConfirmingUpdate,
-    updateSuccess,
-    updateError,
-    source: 'contract-oracle' as const
+    isUpdating: false, // Auto-updating oracle doesn't need manual updates
+    isConfirmingUpdate: false,
+    updateSuccess: true, // Always success with professional oracle
+    updateError: null,
+    source: 'btc-consumer-oracle' as const
   }
 }

@@ -35,16 +35,10 @@ async function main() {
   await oracle.deployed();
   console.log("✅ GPUOracle:", oracle.address);
 
-  // Deploy BTC Price Oracle
-  console.log("\n4. Deploying BTC Price Oracle...");
-  const BTCOracle = await ethers.getContractFactory("BTCOracle");
-  const btcOracle = await BTCOracle.deploy();
-  await btcOracle.deployed();
-  console.log("✅ BTC Oracle:", btcOracle.address);
-  
-  // Set initial BTC price to current market price (~$115k)
-  await btcOracle.updatePrice(ethers.utils.parseUnits("115000", 6)); // $115,000
-  console.log("✅ BTC price set to $115,000");
+  // Use existing professional BTC Consumer Oracle
+  console.log("\n4. Using professional BTC Consumer Oracle...");
+  const btcConsumerAddress = "0x3dCDb917943CCFfC6b5b170a660923f925FA6A3e"; // Deployed Consumer
+  console.log("✅ BTC Consumer Oracle:", btcConsumerAddress);
 
   // Deploy LendingPool  
   console.log("\n5. Deploying LendingPool...");
@@ -52,7 +46,7 @@ async function main() {
   const lendingPool = await LendingPool.deploy(
     bbtc.address,
     mockUSDC.address,
-    btcOracle.address, // Use actual BTC oracle instead of deployer address
+    btcConsumerAddress, // Use professional BTC Consumer oracle
     deployer.address  // Treasury
   );
   await lendingPool.deployed();
@@ -92,7 +86,7 @@ async function main() {
     mockWBTC: mockWBTC.address,
     bBTC: bbtc.address,
     lendingPool: lendingPool.address,
-    btcOracle: btcOracle.address,
+    btcOracle: btcConsumerAddress,
     gpuOracle: oracle.address,
     leaseManager: leaseManager.address,
     deployer: deployer.address

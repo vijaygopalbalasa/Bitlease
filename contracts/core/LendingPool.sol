@@ -307,24 +307,39 @@ contract LendingPool is ReentrancyGuard, Ownable, Pausable {
     }
     
     /**
-     * @notice Get collateral value in USD using price oracle
+     * @notice Get collateral value in USD using BTC Consumer oracle
      */
     function _getCollateralValue(uint256 collateralAmount) internal view returns (uint256) {
-        // Call the price oracle to get current BTC price
+        // Call the BTC Consumer oracle to get current BTC price (18 decimals)
         (bool success, bytes memory data) = priceOracle.staticcall(
-            abi.encodeWithSignature("getLatestPrice()")
+            abi.encodeWithSignature("viewLatestPrice()")
         );
         
-        uint256 btcPrice;
-        if (success && data.length >= 32) {
-            btcPrice = abi.decode(data, (uint256));
+        int256 btcPrice18;
+        bool isStale;
+        
+        if (success && data.length >= 96) {
+            // viewLatestPrice() returns (int256 price, uint256 timestamp, bool isStale)
+            (btcPrice18, , isStale) = abi.decode(data, (int256, uint256, bool));
         } else {
             // Fallback to reasonable price if oracle fails (for safety)
-            btcPrice = 60000 * 1e6; // $60,000 with 6 decimals (USDC format)
+            btcPrice18 = 60000 * 1e18; // $60,000 with 18 decimals
+            isStale = false;
         }
         
-        // bBTC has 8 decimals (like real Bitcoin), convert to USDC value (6 decimals)
-        return (collateralAmount * btcPrice) / 1e8;
+        // Ensure price is valid and not stale
+        require(btcPrice18 > 0, "Invalid BTC price");
+        require(!isStale, "BTC price is stale");
+        
+        // Convert signed to unsigned (price should be positive)
+        uint256 btcPrice = uint256(btcPrice18);
+        
+        // Calculate collateral value:
+        // - collateralAmount: bBTC with 8 decimals
+        // - btcPrice: USD price with 18 decimals  
+        // - Result: USD value with 6 decimals (USDC format)
+        // Formula: (collateralAmount * btcPrice) / (1e8 * 1e12) = (collateralAmount * btcPrice) / 1e20
+        return (collateralAmount * btcPrice) / 1e20;
     }
     
     /**

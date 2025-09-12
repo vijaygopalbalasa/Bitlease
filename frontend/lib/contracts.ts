@@ -1,14 +1,14 @@
 import { Address } from 'viem'
 
-// Contract addresses - Updated with latest deployment
+// Contract addresses - Updated with professional BTC Oracle integration  
 export const CONTRACTS: Record<string, Address> = {
-  bBTC: '0x11a555338C5b504920EE6a475CaD79A4A8e12428',
-  LendingPool: '0xF5416626C8ABb9508CC71294cf3e6f3A161E166E', 
-  LeaseManager: '0x84C7118F9f0e1cf521011A02b7B64ac5112f7317',
-  BTCPriceOracle: '0x321440a843027E339A9aEA0d307583fA47bdBf80', // New BTC Oracle with getLatestPrice()
-  GPUOracle: '0x92f2ee2242519275cCd2E97b656C539E8119953E',
-  WBTC: '0x1ea1D41C571EDfafc3F83DB0b075a4be7268821d',
-  USDC: '0x410805F439b4450fa034Bb4009E4dA86D5d195F2',
+  bBTC: '0xF582deB7975be1328592def5A8Bfda61295160Be',
+  LendingPool: '0xbcbF2F2aA5D6551d6E048AabD3Ea204115E57AF7', 
+  LeaseManager: '0x98796EB52155B417929668efEd70A7f4849B1E62',
+  BTCPriceOracle: '0x3dCDb917943CCFfC6b5b170a660923f925FA6A3e', // Professional BTC Consumer Oracle
+  GPUOracle: '0x70c9356Fd3705c0488028D655B4E85F6dFD74f5D',
+  WBTC: '0xA7F2b3ba25BDC70AdbA096042C7Ec225925790FF',
+  USDC: '0x256137c415A7cF80Ca7648db0A5EAD376b633aFE',
 } as const
 
 export const CORE_TESTNET = {
