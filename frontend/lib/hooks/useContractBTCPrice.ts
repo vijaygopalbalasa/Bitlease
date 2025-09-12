@@ -71,7 +71,6 @@ export function useContractBTCPrice() {
   const updateContractPrice = async (newPriceUSD: number) => {
     try {
       const priceWith6Decimals = Math.floor(newPriceUSD * 1e6) // Convert to 6 decimals
-      console.log('🔄 Updating fresh BTC Oracle with price:', newPriceUSD)
       
       (writeContract as any)({
         address: CONTRACTS.BTCPriceOracle,
@@ -80,7 +79,6 @@ export function useContractBTCPrice() {
         args: [BigInt(priceWith6Decimals)]
       })
     } catch (error) {
-      console.error('❌ Failed to update fresh oracle price:', error)
       throw error
     }
   }
