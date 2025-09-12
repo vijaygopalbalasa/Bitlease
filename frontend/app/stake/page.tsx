@@ -8,6 +8,7 @@ import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { Input } from '../../components/ui/Input';
 import { useBitLeaseStaking, useWBTCFaucet } from '../../lib/hooks/useBitLease';
+import { useHybridBTCOracle } from '../../lib/hooks/useHybridBTCOracle';
 import { CONTRACTS } from '../../lib/contracts';
 import Link from 'next/link';
 
@@ -45,6 +46,9 @@ export default function StakePage() {
     isConfirming: isFaucetConfirming,
     isSuccess: isFaucetSuccess
   } = useWBTCFaucet();
+
+  // Get real BTC price from oracle
+  const { price: btcPrice } = useHybridBTCOracle();
 
 
   useEffect(() => {
@@ -379,7 +383,7 @@ export default function StakePage() {
                           ≈ {(parseFloat(stakeAmount || '0') * parseFloat(exchangeRate)).toFixed(8)} bBTC
                         </div>
                         <div className="text-green-400 text-sm">
-                          Worth ${(parseFloat(stakeAmount || '0') * 60000).toLocaleString()} at current BTC price
+                          Worth ${(parseFloat(stakeAmount || '0') * (btcPrice || 115000)).toLocaleString()} at current BTC price
                         </div>
                       </div>
                     </div>
