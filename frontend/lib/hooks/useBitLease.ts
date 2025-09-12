@@ -4,6 +4,7 @@ import { parseUnits, formatUnits } from 'viem'
 import { useEffect } from 'react'
 import { CONTRACTS } from '../contracts'
 import { useHybridBTCOracle } from './useHybridBTCOracle'
+import { useContractBTCPrice } from './useContractBTCPrice'
 
 // ABI imports - these would be generated from your contracts
 const bBTCABI = [
@@ -483,11 +484,14 @@ export function useBitLeaseLending() {
   const { address } = useAccount()
   const { writeContract, data: hash, isPending, error } = useWriteContract()
 
-  // Professional Hybrid BTC Oracle - combines contract + API sources for maximum reliability
+  // Professional Hybrid BTC Oracle - for display purposes only
   const { price: btcPriceUSD, priceInWei: btcPrice, lastUpdated, isStale, error: priceError, sourceCount, contractPrice, hybridMode } = useHybridBTCOracle()
   
-  // Use hybrid oracle price for all calculations (contract-first, API fallback)
-  const calculationBTCPrice = btcPrice
+  // Contract BTC Oracle - for LTV calculations (must match contract exactly)
+  const { priceInWei: contractBTCPrice, isStale: isContractPriceStale } = useContractBTCPrice()
+  
+  // CRITICAL: Use contract oracle price for LTV calculations to match smart contract
+  const calculationBTCPrice = contractBTCPrice || btcPrice // Fallback to hybrid if contract fails
 
   // Read user debt
   const { data: userDebt } = useReadContract({
@@ -576,9 +580,10 @@ export function useBitLeaseLending() {
       return
     }
     
-    // Calculate expected LTV using HYBRID oracle price for maximum accuracy
+    // Calculate expected LTV using CONTRACT oracle price to match smart contract exactly
+    // Contract logic: (collateralAmount * btcPrice) / 1e8 where btcPrice is in 6 decimals
     const expectedCollateralValue = calculationBTCPrice ? (collateralAmount * calculationBTCPrice) / BigInt(1e8) : 0n
-    const expectedMaxBorrow = expectedCollateralValue ? (expectedCollateralValue * BigInt(5000)) / BigInt(10000) : 0n // 50% LTV - PROFESSIONAL REQUIREMENT
+    const expectedMaxBorrow = expectedCollateralValue ? (expectedCollateralValue * BigInt(5000)) / BigInt(10000) : 0n // 50% LTV - MATCHES CONTRACT
     const ltvCheck = borrowAmount <= expectedMaxBorrow
     
     console.log('Attempting to borrow:', {
@@ -591,19 +596,20 @@ export function useBitLeaseLending() {
       hasEnoughAllowance: bbtcAllowance ? bbtcAllowance >= collateralAmount : false,
       hasEnoughBalance: userBBTCBalance ? userBBTCBalance >= collateralAmount : false,
       poolHasEnoughLiquidity: poolUSDCBalance ? poolUSDCBalance >= borrowAmount : false,
-      // Professional Hybrid Oracle Price Debugging
-      btcPrice: btcPrice?.toString(),
-      btcPriceInUSD: btcPriceUSD ? btcPriceUSD.toFixed(2) : 'N/A',
-      contractPrice: contractPrice?.toString(),
-      contractPriceUSD: contractPrice ? (Number(contractPrice) / 1e8).toFixed(2) : 'N/A',
+      // Price Source Debugging (Critical for LTV matching)
+      hybridBtcPrice: btcPrice?.toString(),
+      hybridBtcPriceUSD: btcPriceUSD ? btcPriceUSD.toFixed(2) : 'N/A',
+      contractBtcPrice: contractBTCPrice?.toString(),
+      contractBtcPriceUSD: contractBTCPrice ? (Number(contractBTCPrice) / 1e6).toFixed(2) : 'N/A',
       calculationPrice: calculationBTCPrice?.toString(),
-      calculationPriceUSD: calculationBTCPrice ? (Number(calculationBTCPrice) / 1e8).toFixed(2) : 'N/A',
+      calculationPriceUSD: calculationBTCPrice ? (Number(calculationBTCPrice) / 1e6).toFixed(2) : 'N/A',
+      priceSource: contractBTCPrice ? 'CONTRACT_ORACLE' : 'HYBRID_FALLBACK',
       lastUpdated: lastUpdated?.toString(),
       lastUpdatedDate: lastUpdated ? new Date(lastUpdated * 1000).toISOString() : 'N/A',
-      isOracleStale: isStale,
+      isHybridStale: isStale,
+      isContractStale: isContractPriceStale,
       oracleSourceCount: sourceCount,
       oracleMode: hybridMode,
-      oracleType: 'Professional Hybrid Oracle (Contract + API)',
       // LTV debugging
       expectedCollateralValue: expectedCollateralValue.toString(),
       expectedMaxBorrow: expectedMaxBorrow.toString(),
@@ -653,14 +659,13 @@ export function useBitLeaseLending() {
       return
     }
     
-    // Check if professional oracle is stale (>5 minutes)
-    if (isStale) {
-      console.error('❌ VALIDATION FAILED: BTC price is stale', {
-        lastUpdated: lastUpdated?.toString(),
-        isStale: isStale,
-        sourceCount: sourceCount
+    // Check if contract oracle price is stale (>5 minutes) - this is critical for LTV accuracy
+    if (isContractPriceStale) {
+      console.error('❌ VALIDATION FAILED: Contract BTC price is stale', {
+        contractPriceStale: isContractPriceStale,
+        fallbackToHybrid: !!btcPrice
       })
-      alert('⚠️ BTC Price Data is Stale\n\nThe BTC price hasn\'t been updated recently. Please wait a moment and try again.')
+      alert('⚠️ Contract BTC Price Data is Stale\n\nThe contract BTC price needs to be updated for accurate LTV calculations. Please try again in a moment.')
       return
     }
     
