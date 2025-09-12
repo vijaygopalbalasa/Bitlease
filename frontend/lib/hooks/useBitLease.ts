@@ -339,7 +339,7 @@ export function useBitLeaseStaking() {
   })
 
   // Read allowance to check if approval is needed
-  const { data: allowance } = useReadContract({
+  const { data: allowance, refetch: refetchAllowance } = useReadContract({
     address: CONTRACTS.WBTC,
     abi: MockWBTCABI,
     functionName: 'allowance',
@@ -369,7 +369,7 @@ export function useBitLeaseStaking() {
         required: amount.toString(),
         current: allowance?.toString() || '0'
       })
-      alert('❌ Insufficient WBTC allowance. Please approve WBTC tokens first.')
+      alert('❌ Insufficient WBTC allowance. Please approve WBTC tokens first and wait for confirmation.')
       return
     }
     
@@ -473,6 +473,7 @@ export function useBitLeaseStaking() {
     deposit,
     withdraw,
     approveWBTC,
+    refetchAllowance,
     isDepositing: isPending,
     isConfirming,
     isSuccess,

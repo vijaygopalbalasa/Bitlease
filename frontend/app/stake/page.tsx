@@ -34,6 +34,7 @@ export default function StakePage() {
     deposit, 
     withdraw,
     approveWBTC,
+    refetchAllowance,
     isDepositing, 
     isConfirming, 
     isSuccess,
@@ -103,17 +104,18 @@ export default function StakePage() {
     }
   }, [stakeAmount, allowance]);
 
-  // Switch to stake step after successful approval
+  // Switch to stake step after successful approval and refetch allowance
   useEffect(() => {
     if (isSuccess && step === 'approve' && lastTransaction === 'approve') {
       // Small delay to allow blockchain state to update
       const timer = setTimeout(() => {
+        refetchAllowance(); // Refresh allowance data
         setStep('stake');
         setIsApproved(true);
-      }, 2000); // 2 second delay
+      }, 3000); // 3 second delay to ensure blockchain confirmation
       return () => clearTimeout(timer);
     }
-  }, [isSuccess, step, lastTransaction]);
+  }, [isSuccess, step, lastTransaction, refetchAllowance]);
 
   const maxStake = wbtcBalance ? Number(wbtcBalance.value) / 1e8 : 0;
 
@@ -401,7 +403,7 @@ export default function StakePage() {
                       </div>
                     ) : (
                       <span className="relative z-10 flex items-center justify-center">
-                        {step === 'approve' ? 'Approve WBTC' : 'Stake Bitcoin'}
+                        {step === 'approve' ? 'Approve WBTC for Staking' : 'Stake Bitcoin & Earn CORE'}
                         <ArrowRightIcon className="h-6 w-6 ml-3 transform group-hover:translate-x-2 transition-transform duration-300" />
                       </span>
                     )}
@@ -418,7 +420,7 @@ export default function StakePage() {
                         </div>
                         <span className="text-green-300 font-bold text-lg">Successfully staked!</span>
                       </div>
-                      <p className="text-green-200 mb-4">Your bBTC is now earning CORE token rewards through dual staking.</p>
+                      <p className="text-green-200 mb-4">Your WBTC has been successfully staked! You now have bBTC tokens earning CORE rewards.</p>
                       <a 
                         href={`https://scan.test2.btcs.network/tx/${hash}`}
                         target="_blank" 
@@ -440,7 +442,7 @@ export default function StakePage() {
                         </div>
                         <span className="text-blue-300 font-bold text-lg">WBTC Approved!</span>
                       </div>
-                      <p className="text-blue-200 mb-4">You can now stake your WBTC to earn CORE rewards.</p>
+                      <p className="text-blue-200 mb-4">WBTC approval confirmed! Now click "Stake Bitcoin" to complete the staking process.</p>
                       <a 
                         href={`https://scan.test2.btcs.network/tx/${hash}`}
                         target="_blank" 
