@@ -20,7 +20,7 @@ contract LendingPool is ReentrancyGuard, Ownable, Pausable {
     // Events
     event Supply(address indexed user, uint256 amount, uint256 shares);
     event Withdraw(address indexed user, uint256 shares, uint256 amount);
-    event Borrow(address indexed user, uint256 amount, uint256 collateral);
+    event Borrow(address indexed user, uint256 amount, uint256 collateral, uint256 originationFee);
     event Repay(address indexed user, uint256 amount, uint256 collateral);
     event Liquidation(
         address indexed borrower, 
@@ -147,13 +147,17 @@ contract LendingPool is ReentrancyGuard, Ownable, Pausable {
         uint256 maxBorrow = (collateralValueUSD * LTV_RATIO) / PRECISION;
         require(borrowAmount <= maxBorrow, "LTV ratio exceeded");
         
+        // Calculate 1% origination fee
+        uint256 originationFee = (borrowAmount * 100) / PRECISION; // 1%
+        uint256 userReceives = borrowAmount - originationFee;
+        
         // Transfer collateral from user
         collateralToken.safeTransferFrom(msg.sender, address(this), collateralAmount);
         
         // Update user data
         UserData storage user = userData[msg.sender];
         user.collateralAmount += collateralAmount;
-        user.borrowedAmount += borrowAmount;
+        user.borrowedAmount += borrowAmount; // Store full amount for repayment
         user.borrowIndex = poolData.liquidityIndex;
         user.lastUpdateTime = block.timestamp;
         
@@ -161,10 +165,12 @@ contract LendingPool is ReentrancyGuard, Ownable, Pausable {
         poolData.totalBorrowed += borrowAmount;
         poolData.totalCollateral += collateralAmount;
         
-        // Transfer USDC to user
-        borrowToken.safeTransfer(msg.sender, borrowAmount);
+        // Transfer USDC to user (minus origination fee)
+        borrowToken.safeTransfer(msg.sender, userReceives);
+        // Transfer origination fee to treasury
+        borrowToken.safeTransfer(treasury, originationFee);
         
-        emit Borrow(msg.sender, borrowAmount, collateralAmount);
+        emit Borrow(msg.sender, borrowAmount, collateralAmount, originationFee);
     }
     
     /**
@@ -277,19 +283,21 @@ contract LendingPool is ReentrancyGuard, Ownable, Pausable {
     }
     
     /**
-     * @notice Get user's total debt with accrued interest
+     * @notice Get user's total debt with simple interest (non-compounding)
      */
     function _getUserDebtWithInterest(address user) internal view returns (uint256) {
         UserData memory userInfo = userData[user];
         if (userInfo.borrowedAmount == 0) return 0;
         
+        // Simple interest calculation: Principal + (Principal × Rate × Time)
+        // For leasing protocol: debt doesn't compound, just accrues linearly
         uint256 timeDelta = block.timestamp - userInfo.lastUpdateTime;
         if (timeDelta == 0) return userInfo.borrowedAmount;
         
-        uint256 currentRate = _calculateInterestRate();
-        uint256 interestAccrued = (userInfo.borrowedAmount * currentRate * timeDelta) / SECONDS_PER_YEAR;
+        // Fixed 8% APR simple interest (not compounding)
+        uint256 simpleInterest = (userInfo.borrowedAmount * 800 * timeDelta) / (PRECISION * SECONDS_PER_YEAR);
         
-        return userInfo.borrowedAmount + interestAccrued;
+        return userInfo.borrowedAmount + simpleInterest;
     }
     
     /**

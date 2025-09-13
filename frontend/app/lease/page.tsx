@@ -404,40 +404,79 @@ export default function LeasePage() {
                       </div>
                     </div>
 
-                    {/* Professional Max USDC Calculation */}
+                    {/* Professional Max USDC Calculation with Fee Breakdown */}
                     {borrowAmount && parseFloat(borrowAmount) > 0 && (
-                      <div className="p-6 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-2xl border border-blue-500/30">
-                        <div className="text-center">
-                          <div className="text-blue-300 font-semibold mb-2">Max USDC you can borrow (50% LTV):</div>
-                          {realBtcPrice && !isBtcPriceLoading ? (
-                            <>
-                              <div className="text-3xl font-black text-blue-200 mb-2">
-                                ${((parseFloat(borrowAmount) * realBtcPrice) * 0.5).toFixed(2)} USDC
-                              </div>
-                              <div className="text-blue-300 text-sm">
-                                Based on live BTC price: ${realBtcPrice.toLocaleString()}
-                              </div>
-                            </>
-                          ) : isBtcPriceLoading ? (
-                            <>
-                              <div className="text-2xl font-black text-yellow-300 mb-2">
-                                Loading Price...
-                              </div>
-                              <div className="text-yellow-200 text-sm">
-                                Fetching live BTC price for calculation
-                              </div>
-                            </>
-                          ) : (
-                            <>
-                              <div className="text-2xl font-black text-red-300 mb-2">
-                                Price Unavailable
-                              </div>
-                              <div className="text-red-200 text-sm">
-                                Unable to fetch BTC price - please check your connection
-                              </div>
-                            </>
-                          )}
+                      <div className="space-y-4">
+                        <div className="p-6 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-2xl border border-blue-500/30">
+                          <div className="text-center">
+                            <div className="text-blue-300 font-semibold mb-2">Max USDC you can borrow (50% LTV):</div>
+                            {realBtcPrice && !isBtcPriceLoading ? (
+                              <>
+                                <div className="text-3xl font-black text-blue-200 mb-2">
+                                  ${((parseFloat(borrowAmount) * realBtcPrice) * 0.5).toFixed(2)} USDC
+                                </div>
+                                <div className="text-blue-300 text-sm">
+                                  Based on live BTC price: ${realBtcPrice.toLocaleString()}
+                                </div>
+                              </>
+                            ) : isBtcPriceLoading ? (
+                              <>
+                                <div className="text-2xl font-black text-yellow-300 mb-2">
+                                  Loading Price...
+                                </div>
+                                <div className="text-yellow-200 text-sm">
+                                  Fetching live BTC price for calculation
+                                </div>
+                              </>
+                            ) : (
+                              <>
+                                <div className="text-2xl font-black text-red-300 mb-2">
+                                  Price Unavailable
+                                </div>
+                                <div className="text-red-200 text-sm">
+                                  Unable to fetch BTC price - please check your connection
+                                </div>
+                              </>
+                            )}
+                          </div>
                         </div>
+
+                        {/* Fee Breakdown */}
+                        {realBtcPrice && !isBtcPriceLoading && (
+                          <div className="p-4 bg-gradient-to-r from-orange-500/20 to-red-500/20 rounded-2xl border border-orange-500/30">
+                            <div className="text-orange-300 font-semibold mb-3 text-center">Fee Breakdown</div>
+                            <div className="space-y-2 text-sm">
+                              {(() => {
+                                const maxBorrow = ((parseFloat(borrowAmount) * realBtcPrice) * 0.5);
+                                const originationFee = maxBorrow * 0.01;
+                                const userReceives = maxBorrow - originationFee;
+                                const annualInterest = maxBorrow * 0.08;
+                                
+                                return (
+                                  <>
+                                    <div className="flex justify-between text-orange-200">
+                                      <span>Loan Amount:</span>
+                                      <span>${maxBorrow.toFixed(2)} USDC</span>
+                                    </div>
+                                    <div className="flex justify-between text-red-300">
+                                      <span>Origination Fee (1%):</span>
+                                      <span>-${originationFee.toFixed(2)} USDC</span>
+                                    </div>
+                                    <div className="border-t border-orange-500/30 pt-2">
+                                      <div className="flex justify-between text-green-300 font-semibold">
+                                        <span>You Receive:</span>
+                                        <span>${userReceives.toFixed(2)} USDC</span>
+                                      </div>
+                                    </div>
+                                    <div className="text-xs text-orange-300 mt-2 text-center">
+                                      Annual Interest: ${annualInterest.toFixed(2)} (8% APR, simple interest)
+                                    </div>
+                                  </>
+                                );
+                              })()}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
 
@@ -631,10 +670,10 @@ export default function LeasePage() {
                               ${userDebt} USDC
                             </div>
                             <div className="text-red-200 mb-3">
-                              Interest accrues at 8% APR (~$0.43/hour)
+                              Simple interest at 8% APR (non-compounding)
                             </div>
                             <div className="text-xs text-red-300 bg-red-900/30 rounded-lg p-2 border border-red-500/20">
-                              ⚠️ Interest compounds continuously. Your debt increases by approximately $0.007 per minute due to 8% annual rate.
+                              ✅ Simple interest model: Debt = Principal + (Principal × 8% × time). No compounding - predictable costs!
                             </div>
                           </div>
                         </div>
