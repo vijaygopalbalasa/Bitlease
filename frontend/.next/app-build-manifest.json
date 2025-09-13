@@ -26,16 +26,8 @@
       "static/chunks/7614-989aef943a3f99e9.js",
       "static/chunks/4813-d4b4d5c94fac254a.js",
       "static/chunks/6330-60f9a27c956ba59a.js",
-      "static/chunks/4468-01a4d3de4252315f.js",
+      "static/chunks/4468-6e1ecab73e90f963.js",
       "static/chunks/app/lease/page-ab1822a9a1652dad.js"
-    ],
-    "/dashboard/page": [
-      "static/chunks/webpack-7d9cc9a76ce6bbd8.js",
-      "static/chunks/fd9d1056-7bd944443c6dba3b.js",
-      "static/chunks/7023-9f97b69ca53e53d2.js",
-      "static/chunks/main-app-db942462eb690963.js",
-      "static/chunks/7614-989aef943a3f99e9.js",
-      "static/chunks/app/dashboard/page-3dfb457a06a8d64c.js"
     ],
     "/page": [
       "static/chunks/webpack-7d9cc9a76ce6bbd8.js",
@@ -53,8 +45,16 @@
       "static/chunks/7614-989aef943a3f99e9.js",
       "static/chunks/4813-d4b4d5c94fac254a.js",
       "static/chunks/6330-60f9a27c956ba59a.js",
-      "static/chunks/4468-01a4d3de4252315f.js",
+      "static/chunks/4468-6e1ecab73e90f963.js",
       "static/chunks/app/stake/page-1cada04d1ff0c4ec.js"
+    ],
+    "/dashboard/page": [
+      "static/chunks/webpack-7d9cc9a76ce6bbd8.js",
+      "static/chunks/fd9d1056-7bd944443c6dba3b.js",
+      "static/chunks/7023-9f97b69ca53e53d2.js",
+      "static/chunks/main-app-db942462eb690963.js",
+      "static/chunks/7614-989aef943a3f99e9.js",
+      "static/chunks/app/dashboard/page-3dfb457a06a8d64c.js"
     ]
   }
 }
