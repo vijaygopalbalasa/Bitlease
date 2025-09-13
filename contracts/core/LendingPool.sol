@@ -136,8 +136,8 @@ contract LendingPool is ReentrancyGuard, Ownable, Pausable {
         
         _updateInterestRates();
         
-        // Check available liquidity
-        uint256 availableLiquidity = poolData.totalSupplied - poolData.totalBorrowed;
+        // Check available liquidity - HOTFIX: Use actual token balance instead of tracked balance
+        uint256 availableLiquidity = borrowToken.balanceOf(address(this));
         require(borrowAmount <= availableLiquidity, "Insufficient liquidity");
         
         // Get collateral value in USD
