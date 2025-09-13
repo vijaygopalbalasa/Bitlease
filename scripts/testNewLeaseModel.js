@@ -9,7 +9,7 @@ async function main() {
   // New leasing model contract
   const USDC_ADDRESS = "0x256137c415A7cF80Ca7648db0A5EAD376b633aFE";
   const BBTC_ADDRESS = "0xF582deB7975be1328592def5A8Bfda61295160Be";
-  const LEASING_POOL_ADDRESS = "0xC27B1396d2e478bC113abe1794A6eC701B0b28D2";
+  const LEASING_POOL_ADDRESS = "0x42d56Ca32001C292234c778b0c81603df6b01fE4";
   const BTC_ORACLE_ADDRESS = "0x37bd6733A504978b6dE8E5AD2A215789B1FDD15C";
 
   // Get contracts
@@ -27,14 +27,14 @@ async function main() {
     console.log("Initial USDC balance:", ethers.utils.formatUnits(initialUsdcBalance, 6), "USDC");
     console.log("Initial bBTC balance:", ethers.utils.formatUnits(initialBbtcBalance, 8), "bBTC");
 
-    // Test parameters - matching your example
-    const borrowAmount = ethers.utils.parseUnits("1000", 6); // $1,000 USDC
-    const collateralAmount = ethers.utils.parseUnits("0.02", 8); // 0.02 bBTC (should be worth ~$2,000 at current price)
+    // Test parameters - very conservative amount
+    const borrowAmount = ethers.utils.parseUnits("500", 6); // $500 USDC  
+    const collateralAmount = ethers.utils.parseUnits("0.01", 8); // 0.01 bBTC = $1,159.75, 50% LTV = $579.87
     
     console.log("\n💰 Leasing Model Test:");
     console.log("Requesting:", ethers.utils.formatUnits(borrowAmount, 6), "USDC");
-    console.log("Expected fee (1%):", "$10 USDC");
-    console.log("Expected to receive:", "$990 USDC");
+    console.log("Expected fee (1%):", "$5 USDC");
+    console.log("Expected to receive:", "$495 USDC");
     console.log("Collateral:", ethers.utils.formatUnits(collateralAmount, 8), "bBTC");
 
     // Check allowance
@@ -60,7 +60,7 @@ async function main() {
     
     console.log("\n📈 Results:");
     console.log("USDC received:", ethers.utils.formatUnits(usdcReceived, 6), "USDC");
-    console.log("Expected:", "$990 USDC (after 1% fee)");
+    console.log("Expected:", "$495 USDC (after 1% fee)");
     
     const actualFee = borrowAmount.sub(usdcReceived);
     console.log("Actual fee:", ethers.utils.formatUnits(actualFee, 6), "USDC");
@@ -69,7 +69,7 @@ async function main() {
     // Check user debt
     const userDebt = await lendingPool.getUserDebt(deployer.address);
     console.log("User debt recorded:", ethers.utils.formatUnits(userDebt, 6), "USDC");
-    console.log("(This is what user needs to repay - full $1,000 + interest)");
+    console.log("(This is what user needs to repay - full $500 + interest)");
 
     console.log("\n🎉 LEASING MODEL TEST SUCCESSFUL!");
     console.log("✅ 1% origination fee working correctly");

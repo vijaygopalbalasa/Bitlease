@@ -11,7 +11,7 @@ async function main() {
 
   // Contract addresses from deployed-addresses.json
   const USDC_ADDRESS = "0x256137c415A7cF80Ca7648db0A5EAD376b633aFE";
-  const LENDING_POOL_ADDRESS = "0xC27B1396d2e478bC113abe1794A6eC701B0b28D2";
+  const LENDING_POOL_ADDRESS = "0x42d56Ca32001C292234c778b0c81603df6b01fE4";
 
   // Get contracts
   const usdc = await ethers.getContractAt("IERC20", USDC_ADDRESS);
