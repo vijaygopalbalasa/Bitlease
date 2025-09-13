@@ -34,14 +34,17 @@ export default function LeasePage() {
     token: CONTRACTS.USDC,
   });
   
-  // Use professional multi-source BTC price oracle
-  const { price: realBtcPrice, isLoading: isBtcPriceLoading, error: btcPriceError } = useProfessionalBTCPrice();
-  
+  // Use professional multi-source BTC price oracle (for display only)
+  const { price: displayBtcPrice, isLoading: isBtcPriceLoading, error: btcPriceError } = useProfessionalBTCPrice();
   const { supportedGPUs } = useBitLeaseGPU();
   const { price: selectedGPUPrice, isLoading: isPriceLoading } = useBitLeaseGPUPrice(selectedGPU);
   const { createLease, isCreatingLease: isTransactionPending, isConfirming: isLeaseConfirming, isSuccess: isLeaseSuccess, hash: leaseHash } = useBitLeaseLeases();
   const { bbtcBalance: stakingBalance } = useBitLeaseStaking();
   const { borrow, repay, approveBBTC, bbtcAllowance, userBBTCBalance, poolUSDCBalance, btcPrice: oracleBtcPrice, btcPriceUSD, lastUpdated, isOracleStale, oracleSourceCount, isPending: isBorrowPending, isConfirming: isBorrowConfirming, isSuccess: isBorrowSuccess, error, hash: borrowHash, userDebt, userCollateral, isApprovalPending, isApprovalConfirming, isApprovalSuccess, approvalError, approvalHash } = useBitLeaseLending();
+  
+  // CRITICAL: Use contract oracle price for all calculations to match contract exactly
+  const realBtcPrice = btcPriceUSD || displayBtcPrice; // Use contract oracle price first
+  const isRealPriceLoading = !btcPriceUSD && isBtcPriceLoading; // Loading if no contract price and display is loading
 
   // Refresh USDC balance after successful borrow
   useEffect(() => {
@@ -259,7 +262,7 @@ export default function LeasePage() {
                 <div className="flex items-center justify-between mb-4">
                   <span className="text-blue-300 font-semibold">Live BTC Price:</span>
                   <span className="text-white font-bold text-xl">
-                    {isBtcPriceLoading ? 'Loading...' : realBtcPrice ? `$${realBtcPrice.toLocaleString()}` : 'Error'}
+                    {isRealPriceLoading ? 'Loading...' : realBtcPrice ? `$${realBtcPrice.toLocaleString()}` : 'Error'}
                   </span>
                 </div>
                 
@@ -268,20 +271,20 @@ export default function LeasePage() {
                   <span className="text-gray-400">Price Feed:</span>
                   <div className="flex items-center space-x-2">
                     <div className={`w-2 h-2 rounded-full ${
-                      isBtcPriceLoading 
+                      isRealPriceLoading 
                         ? 'bg-yellow-400 animate-pulse'
                         : realBtcPrice 
                           ? 'bg-green-400'
                           : 'bg-red-400'
                     }`}></div>
                     <span className={`text-sm font-medium ${
-                      isBtcPriceLoading 
+                      isRealPriceLoading 
                         ? 'text-yellow-400'
                         : realBtcPrice 
                           ? 'text-green-400' 
                           : 'text-red-400'
                     }`}>
-                      {isBtcPriceLoading ? 'Updating' : realBtcPrice ? 'Live' : 'Error'}
+                      {isRealPriceLoading ? 'Updating' : realBtcPrice ? 'Live' : 'Error'}
                     </span>
                   </div>
                 </div>
@@ -410,7 +413,7 @@ export default function LeasePage() {
                         <div className="p-6 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-2xl border border-blue-500/30">
                           <div className="text-center">
                             <div className="text-blue-300 font-semibold mb-2">Max USDC you can borrow (50% LTV):</div>
-                            {realBtcPrice && !isBtcPriceLoading ? (
+                            {realBtcPrice && !isRealPriceLoading ? (
                               <>
                                 <div className="text-3xl font-black text-blue-200 mb-2">
                                   ${((parseFloat(borrowAmount) * realBtcPrice) * 0.5).toFixed(2)} USDC
@@ -419,7 +422,7 @@ export default function LeasePage() {
                                   Based on live BTC price: ${realBtcPrice.toLocaleString()}
                                 </div>
                               </>
-                            ) : isBtcPriceLoading ? (
+                            ) : isRealPriceLoading ? (
                               <>
                                 <div className="text-2xl font-black text-yellow-300 mb-2">
                                   Loading Price...
@@ -442,7 +445,7 @@ export default function LeasePage() {
                         </div>
 
                         {/* Fee Breakdown */}
-                        {realBtcPrice && !isBtcPriceLoading && (
+                        {realBtcPrice && !isRealPriceLoading && (
                           <div className="p-4 bg-gradient-to-r from-orange-500/20 to-red-500/20 rounded-2xl border border-orange-500/30">
                             <div className="text-orange-300 font-semibold mb-3 text-center">Fee Breakdown</div>
                             <div className="space-y-2 text-sm">
@@ -508,7 +511,7 @@ export default function LeasePage() {
                             console.log('Borrow button clicked:', {
                               borrowAmount,
                               realBtcPrice,
-                              isBtcPriceLoading,
+                              isRealPriceLoading,
                               hasValidInputs: borrowAmount && realBtcPrice && realBtcPrice > 0
                             });
                             
@@ -532,19 +535,19 @@ export default function LeasePage() {
                               });
                             }
                           }}
-                          disabled={isBorrowPending || isBorrowConfirming || !borrowAmount || parseFloat(borrowAmount) <= 0 || !realBtcPrice || isBtcPriceLoading}
+                          disabled={isBorrowPending || isBorrowConfirming || !borrowAmount || parseFloat(borrowAmount) <= 0 || !realBtcPrice || isRealPriceLoading}
                           className="group relative w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white py-4 rounded-2xl text-lg font-bold shadow-xl transform hover:scale-105 transition-all duration-300 overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           <span className="relative z-10 flex items-center justify-center">
                             {isBorrowConfirming 
                               ? 'Borrowing...' 
-                              : isBtcPriceLoading
+                              : isRealPriceLoading
                                 ? 'Loading BTC Price...'
                                 : !realBtcPrice
                                   ? 'BTC Price Unavailable'
                                   : 'Borrow Max USDC Against bBTC'
                             }
-                            {!isBorrowConfirming && realBtcPrice && !isBtcPriceLoading && <ArrowRightIcon className="h-5 w-5 ml-3 transform group-hover:translate-x-2 transition-transform duration-300" />}
+                            {!isBorrowConfirming && realBtcPrice && !isRealPriceLoading && <ArrowRightIcon className="h-5 w-5 ml-3 transform group-hover:translate-x-2 transition-transform duration-300" />}
                           </span>
                         </Button>
                       )}
