@@ -123,7 +123,7 @@ export function useHybridBTCOracle(): OracleResult {
   };
 
   const calculateRobustPrice = (prices: Record<string, number>): number | null => {
-    const values = Object.values(prices);
+    const values = Object.values(prices).filter(price => price > 0); // Filter out invalid prices
     if (values.length === 0) return null;
 
     // Remove outliers using IQR method for professional accuracy
@@ -131,7 +131,7 @@ export function useHybridBTCOracle(): OracleResult {
     const q1 = values[Math.floor(values.length * 0.25)];
     const q3 = values[Math.floor(values.length * 0.75)];
     const iqr = q3 - q1;
-    const lowerBound = q1 - 1.5 * iqr;
+    const lowerBound = Math.max(1000, q1 - 1.5 * iqr); // Ensure minimum valid BTC price
     const upperBound = q3 + 1.5 * iqr;
     
     const filtered = values.filter(price => 
@@ -141,7 +141,8 @@ export function useHybridBTCOracle(): OracleResult {
     if (filtered.length === 0) return values[Math.floor(values.length / 2)]; // fallback to median
 
     // Return weighted average (more recent sources get higher weight)
-    return filtered.reduce((sum, price) => sum + price, 0) / filtered.length;
+    const result = filtered.reduce((sum, price) => sum + price, 0) / filtered.length;
+    return Math.max(0, result); // Ensure non-negative result
   };
 
   const updatePrice = async () => {
@@ -186,7 +187,7 @@ export function useHybridBTCOracle(): OracleResult {
 
   // Determine best price source and mode
   const getBestPrice = (): { price: number | null, mode: 'contract' | 'api' | 'hybrid', priceInWei: bigint | null } => {
-    const contractPriceNumber = contractPrice ? Number(contractPrice) / 1e6 : null; // Oracle returns price in 6 decimals
+    const contractPriceNumber = contractPrice ? Math.max(0, Number(contractPrice) / 1e6) : null; // Oracle returns price in 6 decimals, ensure positive
     
     // If contract price is available and reasonable
     if (contractPriceNumber && contractPriceNumber > 1000 && contractPriceNumber < 1000000) {
@@ -208,11 +209,13 @@ export function useHybridBTCOracle(): OracleResult {
     }
     
     // Fallback to API price
-    if (apiPrice) {
+    if (apiPrice && apiPrice > 0) {
+      // Ensure the price is valid before parsing
+      const priceString = Math.max(0, apiPrice).toFixed(8);
       return {
         price: apiPrice,
         mode: 'api',
-        priceInWei: parseUnits(apiPrice.toFixed(8), 8)
+        priceInWei: parseUnits(priceString, 8)
       };
     }
     
