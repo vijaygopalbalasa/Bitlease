@@ -1029,8 +1029,14 @@ export default function LeasePage() {
                           return;
                         }
                         
-                        // Simulate successful lease
-                        alert(`🎉 DEMO LEASE SUCCESSFUL!\n\n📊 GPU: ${gpuOptions[selectedGPU].name}\n⏰ Duration: ${leaseHours} hours\n💰 Cost: $${cost} USDC\n\n🔗 Simulated Transaction:\n0x${Math.random().toString(16).substr(2, 40)}\n\n✅ In real deployment, this would:\n• Deduct $${cost} USDC from wallet\n• Connect to GPU provider (Vast.ai)\n• Provision ${gpuOptions[selectedGPU].name} instance\n• Return SSH/API access details`);
+                        // Simulate successful lease with enhanced feedback
+                        const selectedGPUInfo = gpuOptions.find(gpu => gpu.name === selectedGPU);
+                        const txHash = Math.random().toString(16).substr(2, 40);
+                        
+                        alert(`🎉 DEMO GPU LEASE SUCCESSFUL!\n\n📊 GPU: ${selectedGPU}\n⏰ Duration: ${leaseHours} hours\n💰 Cost: $${cost} USDC\n\n🔗 Simulated Transaction:\n0x${txHash}\n\n✅ In Phase 2 deployment, this would:\n• Deduct $${cost} USDC from your wallet\n• Connect to GPU infrastructure partner\n• Provision ${selectedGPU} instance instantly\n• Return SSH credentials & API access\n• Add lease to your Dashboard\n\n🚀 EXPERIENCE THE REAL PROTOCOL:\nTry Bitcoin staking & USDC borrowing - 100% live on testnet!`);
+                        
+                        // Optional: Could redirect to dashboard or show success state
+                        console.log(`Demo lease created: ${selectedGPU} for ${leaseHours}h at $${cost}`);
                       }}
                       disabled={!selectedGPU || !leaseHours || !usdcBalance || parseFloat(totalWithFee) > (Number(usdcBalance.value) / 1e6)}
                       className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white py-6 rounded-2xl text-xl font-bold transform hover:scale-105 transition-all duration-300 shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
