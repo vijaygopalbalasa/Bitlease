@@ -466,9 +466,37 @@ export function useBitLeaseStaking() {
     // })
   }
 
+  // Safe formatUnits wrapper to handle edge cases
+  const safeFormatUnits = (value: any, decimals: number, fallback: string) => {
+    try {
+      if (!value) return fallback;
+      
+      // Convert to bigint if needed and ensure it's positive
+      let bigintValue: bigint;
+      if (typeof value === 'bigint') {
+        bigintValue = value;
+      } else if (typeof value === 'string' || typeof value === 'number') {
+        bigintValue = BigInt(value);
+      } else {
+        return fallback;
+      }
+      
+      // Ensure the value is not negative (which can cause viem errors)
+      if (bigintValue < 0n) {
+        console.warn('Negative value detected, using fallback:', bigintValue.toString());
+        return fallback;
+      }
+      
+      return formatUnits(bigintValue, decimals);
+    } catch (error) {
+      console.error('formatUnits error:', error, 'value:', value);
+      return fallback;
+    }
+  };
+
   return {
-    bbtcBalance: bbtcBalance ? formatUnits(bbtcBalance as bigint, 8) : '0', // Reverted: bBTC uses 8 decimals like WBTC
-    exchangeRate: exchangeRate ? formatUnits(exchangeRate as bigint, 18) : '1',
+    bbtcBalance: safeFormatUnits(bbtcBalance, 8, '0'),
+    exchangeRate: safeFormatUnits(exchangeRate, 18, '1'),
     allowance: allowance || 0n,
     deposit,
     withdraw,
@@ -849,10 +877,38 @@ export function useBitLeaseLending() {
     }
   }, [isApprovalSuccess, approvalHash, refetchBBTCAllowance, refetchUSDCAllowance])
 
+  // Safe formatUnits wrapper for lending hook
+  const safeFormatUnitsLending = (value: any, decimals: number, fallback: string) => {
+    try {
+      if (!value) return fallback;
+      
+      // Convert to bigint if needed and ensure it's positive
+      let bigintValue: bigint;
+      if (typeof value === 'bigint') {
+        bigintValue = value;
+      } else if (typeof value === 'string' || typeof value === 'number') {
+        bigintValue = BigInt(value);
+      } else {
+        return fallback;
+      }
+      
+      // Ensure the value is not negative (which can cause viem errors)
+      if (bigintValue < 0n) {
+        console.warn('Negative value detected in lending hook, using fallback:', bigintValue.toString());
+        return fallback;
+      }
+      
+      return formatUnits(bigintValue, decimals);
+    } catch (error) {
+      console.error('formatUnits error in lending hook:', error, 'value:', value);
+      return fallback;
+    }
+  };
+
   return {
-    userDebt: userDebt ? formatUnits(userDebt as bigint, 6) : '0',
-    userCollateral: userCollateral ? formatUnits(userCollateral as bigint, 8) : '0',
-    healthFactor: healthFactor ? formatUnits(healthFactor as bigint, 18) : '0',
+    userDebt: safeFormatUnitsLending(userDebt, 6, '0'),
+    userCollateral: safeFormatUnitsLending(userCollateral, 8, '0'),
+    healthFactor: safeFormatUnitsLending(healthFactor, 18, '0'),
     bbtcAllowance: bbtcAllowance || 0n,
     usdcAllowance: usdcAllowance || 0n, // USDC allowance for repayment
     userBBTCBalance: userBBTCBalance || 0n,
