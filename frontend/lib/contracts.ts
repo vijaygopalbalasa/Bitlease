@@ -3,7 +3,7 @@ import { Address } from 'viem'
 // Contract addresses - Updated with professional BTC Oracle integration  
 export const CONTRACTS: Record<string, Address> = {
   bBTC: '0xF582deB7975be1328592def5A8Bfda61295160Be',
-  LendingPool: '0x9640dcbeB49c6eebed6eA6c90e1eE7c31431D061', // FIXED CONTRACT - Resolved storage corruption bug 
+  LendingPool: '0x3Cf9Da00a206c8F0970488C70Aa6806a74bd573B', // HOTFIX CONTRACT - Fixed liquidity check bug 
   LeaseManager: '0x98796EB52155B417929668efEd70A7f4849B1E62',
   BTCPriceOracle: '0x37bd6733A504978b6dE8E5AD2A215789B1FDD15C', // Fresh BTC Oracle with current price
   GPUOracle: '0x70c9356Fd3705c0488028D655B4E85F6dFD74f5D',
