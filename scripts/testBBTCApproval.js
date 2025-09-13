@@ -8,7 +8,7 @@ async function main() {
 
   // Contract addresses - exactly as used in frontend
   const BBTC_ADDRESS = "0xF582deB7975be1328592def5A8Bfda61295160Be";
-  const LENDING_POOL_ADDRESS = "0xbcbF2F2aA5D6551d6E048AabD3Ea204115E57AF7";
+  const LENDING_POOL_ADDRESS = "0xC27B1396d2e478bC113abe1794A6eC701B0b28D2";
 
   // Get contracts
   const bbtc = await ethers.getContractAt("IERC20", BBTC_ADDRESS);

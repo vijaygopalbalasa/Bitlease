@@ -7,7 +7,7 @@ async function main() {
   console.log("Checking with account:", deployer.address);
 
   // Contract addresses
-  const LENDING_POOL_ADDRESS = "0xbcbF2F2aA5D6551d6E048AabD3Ea204115E57AF7";
+  const LENDING_POOL_ADDRESS = "0xC27B1396d2e478bC113abe1794A6eC701B0b28D2";
   const BTC_CONSUMER_ADDRESS = "0x3dCDb917943CCFfC6b5b170a660923f925FA6A3e";
 
   // Get LendingPool contract

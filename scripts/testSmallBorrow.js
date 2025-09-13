@@ -8,7 +8,7 @@ async function main() {
 
   const USDC_ADDRESS = "0x256137c415A7cF80Ca7648db0A5EAD376b633aFE";
   const BBTC_ADDRESS = "0xF582deB7975be1328592def5A8Bfda61295160Be";
-  const FRESH_LENDING_POOL_ADDRESS = "0x485BD8041f358a20df5Ae5eb9910c1e011Bf6f1e";
+  const FRESH_LENDING_POOL_ADDRESS = "0xC27B1396d2e478bC113abe1794A6eC701B0b28D2";
 
   const usdc = await ethers.getContractAt("IERC20", USDC_ADDRESS);
   const bbtc = await ethers.getContractAt("IERC20", BBTC_ADDRESS);
