@@ -136,7 +136,15 @@ export default function LeasePage() {
     }
   };
 
-  const selectedPrice = selectedGPUPrice;
+  // Use mock prices for demo purposes since GPU oracle isn't deployed
+  const mockGPUPrices = {
+    'A100': '2.50',
+    'H100': '4.00', 
+    'V100': '1.80',
+    'RTX 4090': '1.20'
+  };
+  
+  const selectedPrice = selectedGPUPrice && selectedGPUPrice !== '0' ? selectedGPUPrice : mockGPUPrices[selectedGPU] || '2.50';
   const totalCost = (parseFloat(selectedPrice) * parseFloat(leaseHours || '0')).toFixed(2);
   const platformFee = (parseFloat(totalCost) * 0.025).toFixed(2); // 2.5% fee
   const totalWithFee = (parseFloat(totalCost) + parseFloat(platformFee)).toFixed(2);
@@ -863,7 +871,7 @@ export default function LeasePage() {
               
               <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
                 {gpuOptions.map((gpu, index) => {
-                  const price = selectedGPU === gpu.name ? selectedGPUPrice : '0.00';
+                  const price = selectedGPU === gpu.name ? selectedPrice : (mockGPUPrices[gpu.name] || '2.50');
                   const isAvailable = true;
                   const isSelected = selectedGPU === gpu.name;
                   const isActive = activeGPU === index;
@@ -957,8 +965,19 @@ export default function LeasePage() {
                     <div className="w-12 h-12 bg-gray-600 rounded-2xl flex items-center justify-center mr-4 shadow-lg">
                       <CpuChipIcon className="h-7 w-7 text-white" />
                     </div>
-                    GPU Leasing (Testnet Disabled)
+                    GPU Leasing - Live Demo
                   </h3>
+                  
+                  <div className="bg-blue-500/20 border border-blue-500/30 rounded-2xl p-6 mb-8">
+                    <div className="flex items-center space-x-3 mb-3">
+                      <InformationCircleIcon className="h-6 w-6 text-blue-400" />
+                      <h4 className="text-blue-300 font-semibold text-lg">Live Demo - Real DeFi + Mock GPU Infrastructure</h4>
+                    </div>
+                    <p className="text-blue-200 text-sm leading-relaxed">
+                      You're seeing the complete BitLease vision: <strong>Real Bitcoin staking and USDC borrowing</strong> is live on Core DAO testnet. 
+                      The GPU leasing interface shows our Phase 2 roadmap with realistic pricing. Borrow USDC against your BTC collateral to experience the core protocol!
+                    </p>
+                  </div>
                   
                   <div className="space-y-6">
                     <div>
