@@ -623,15 +623,18 @@ export default function LeasePage() {
                       </h3>
                       
                       <div className="space-y-6">
-                        {/* Enhanced Current Debt Display */}
+                        {/* Enhanced Current Debt Display with Interest Explanation */}
                         <div className="bg-gradient-to-br from-red-500/20 to-pink-500/20 border border-red-500/30 rounded-2xl p-6">
                           <div className="text-center">
                             <div className="text-red-300 text-lg font-semibold mb-2">Outstanding USDC Debt:</div>
                             <div className="text-white font-black text-3xl mb-2">
                               ${userDebt} USDC
                             </div>
-                            <div className="text-red-200">
-                              Interest accrues at 8% APR
+                            <div className="text-red-200 mb-3">
+                              Interest accrues at 8% APR (~$0.43/hour)
+                            </div>
+                            <div className="text-xs text-red-300 bg-red-900/30 rounded-lg p-2 border border-red-500/20">
+                              ⚠️ Interest compounds continuously. Your debt increases by approximately $0.007 per minute due to 8% annual rate.
                             </div>
                           </div>
                         </div>
@@ -648,6 +651,7 @@ export default function LeasePage() {
 
                         {/* Enhanced Repay Actions */}
                         <div className="space-y-6">
+                          {/* Full Repay Button */}
                           <Button
                             onClick={() => {
                               if (userDebt && parseFloat(userDebt) > 0 && userCollateral) {
@@ -658,7 +662,7 @@ export default function LeasePage() {
                               }
                             }}
                             disabled={isBorrowPending || isBorrowConfirming || parseFloat(userDebt) <= 0 || !usdcBalance || Number(usdcBalance.value) < Number(parseUnits(userDebt, 6))}
-                            className="group relative w-full bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white py-6 rounded-2xl text-xl font-bold shadow-2xl shadow-green-500/30 transform hover:scale-105 transition-all duration-300 overflow-hidden"
+                            className="group relative w-full bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white py-6 rounded-2xl text-xl font-bold shadow-2xl shadow-green-500/30 transform hover:scale-105 transition-all duration-300 overflow-hidden disabled:opacity-50"
                           >
                             <span className="relative z-10 flex items-center justify-center">
                               {isBorrowConfirming ? 'Repaying...' : `Repay Full Debt (${userDebt} USDC)`}
@@ -666,6 +670,45 @@ export default function LeasePage() {
                             </span>
                             <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 to-green-500 translate-x-full group-hover:translate-x-0 transition-transform duration-700"></div>
                           </Button>
+
+                          {/* Partial Repay Option when user doesn't have enough USDC */}
+                          {usdcBalance && Number(usdcBalance.value) < Number(parseUnits(userDebt, 6)) && Number(usdcBalance.value) > 0 && (
+                            <Button
+                              onClick={() => {
+                                if (usdcBalance && userCollateral) {
+                                  // Repay whatever USDC the user has available
+                                  const availableUSDC = usdcBalance.value;
+                                  const repayAmount = availableUSDC;
+                                  // Don't withdraw collateral on partial repay for safety
+                                  repay(repayAmount, 0n);
+                                }
+                              }}
+                              disabled={isBorrowPending || isBorrowConfirming || parseFloat(userDebt) <= 0}
+                              className="group relative w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white py-6 rounded-2xl text-xl font-bold shadow-2xl shadow-yellow-500/30 transform hover:scale-105 transition-all duration-300 overflow-hidden"
+                            >
+                              <span className="relative z-10 flex items-center justify-center">
+                                {isBorrowConfirming ? 'Repaying...' : `Partial Repay (${(Number(usdcBalance.value) / 1e6).toFixed(2)} USDC)`}
+                                {!isBorrowConfirming && <ArrowRightIcon className="h-6 w-6 ml-3 transform group-hover:translate-x-2 transition-transform duration-300" />}
+                              </span>
+                              <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-orange-500 translate-x-full group-hover:translate-x-0 transition-transform duration-700"></div>
+                            </Button>
+                          )}
+
+                          {/* Insufficient balance warning */}
+                          {(!usdcBalance || Number(usdcBalance.value) < Number(parseUnits(userDebt, 6))) && (
+                            <div className="bg-gradient-to-r from-red-500/20 to-orange-500/20 border border-red-500/30 rounded-2xl p-4">
+                              <div className="flex items-center space-x-3">
+                                <InformationCircleIcon className="h-6 w-6 text-red-400 flex-shrink-0" />
+                                <div className="text-red-200">
+                                  <div className="font-semibold mb-1">Insufficient USDC Balance</div>
+                                  <div className="text-sm text-red-300">
+                                    You need ${parseFloat(userDebt).toFixed(2)} USDC but only have ${usdcBalance ? (Number(usdcBalance.value) / 1e6).toFixed(2) : '0.00'} USDC. 
+                                    {Number(usdcBalance?.value || 0) > 0 ? ' Use partial repay to reduce your debt.' : ' You need to acquire more USDC to repay your debt.'}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          )}
 
                           {/* Enhanced Post-Repayment Instructions */}
                           <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-2xl p-6">
@@ -714,8 +757,9 @@ export default function LeasePage() {
                       <div className="text-gray-300 space-y-2 leading-relaxed">
                         <p>• <strong className="text-white">GPU Prices:</strong> Currently showing static/mock prices for testing purposes</p>
                         <p>• <strong className="text-white">BitLease Revenue:</strong> 2.5% platform fee on all GPU leases</p>
-                        <p>• <strong className="text-white">Testnet Mode:</strong> GPU leasing disabled - only borrowing/repaying works</p>
+                        <p>• <strong className="text-orange-400">Demo Mode:</strong> GPU leasing simulated for user testing - shows complete flow</p>
                         <p>• <strong className="text-white">Mainnet:</strong> Will connect to live GPU marketplaces like Vast.ai for real pricing</p>
+                        <p>• <strong className="text-green-400">Real Users Can Test:</strong> Complete borrow → lease simulation → repay cycle</p>
                       </div>
                     </div>
                   </div>
@@ -877,11 +921,30 @@ export default function LeasePage() {
                     </div>
 
                     <Button
-                      onClick={handleCreateLease}
-                      disabled={true}
-                      className="w-full bg-gray-600 cursor-not-allowed py-6 rounded-2xl text-xl font-bold"
+                      onClick={() => {
+                        // DEMO MODE: Simulate GPU lease for testing
+                        if (!selectedGPU || !leaseHours || !usdcBalance) {
+                          alert('⚠️ Please select GPU, hours, and ensure you have USDC balance');
+                          return;
+                        }
+                        
+                        const cost = parseFloat(totalWithFee);
+                        const availableUSDC = Number(usdcBalance.value) / 1e6;
+                        
+                        if (cost > availableUSDC) {
+                          alert(`❌ Insufficient USDC! Need $${cost} but have $${availableUSDC.toFixed(2)}`);
+                          return;
+                        }
+                        
+                        // Simulate successful lease
+                        alert(`🎉 DEMO LEASE SUCCESSFUL!\n\n📊 GPU: ${gpuOptions[selectedGPU].name}\n⏰ Duration: ${leaseHours} hours\n💰 Cost: $${cost} USDC\n\n🔗 Simulated Transaction:\n0x${Math.random().toString(16).substr(2, 40)}\n\n✅ In real deployment, this would:\n• Deduct $${cost} USDC from wallet\n• Connect to GPU provider (Vast.ai)\n• Provision ${gpuOptions[selectedGPU].name} instance\n• Return SSH/API access details`);
+                      }}
+                      disabled={!selectedGPU || !leaseHours || !usdcBalance || parseFloat(totalWithFee) > (Number(usdcBalance.value) / 1e6)}
+                      className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white py-6 rounded-2xl text-xl font-bold transform hover:scale-105 transition-all duration-300 shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                     >
-                      GPU Leasing Disabled in Testnet
+                      {!usdcBalance ? 'Connect Wallet' : 
+                       parseFloat(totalWithFee) > (Number(usdcBalance.value) / 1e6) ? 'Insufficient USDC' :
+                       '🚀 Start GPU Lease (DEMO)'}
                     </Button>
                   </div>
                 </div>
