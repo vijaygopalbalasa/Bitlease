@@ -186,7 +186,7 @@ export function useHybridBTCOracle(): OracleResult {
 
   // Determine best price source and mode
   const getBestPrice = (): { price: number | null, mode: 'contract' | 'api' | 'hybrid', priceInWei: bigint | null } => {
-    const contractPriceNumber = contractPrice ? Number(contractPrice) / 1e8 : null;
+    const contractPriceNumber = contractPrice ? Number(contractPrice) / 1e6 : null; // Oracle returns price in 6 decimals
     
     // If contract price is available and reasonable
     if (contractPriceNumber && contractPriceNumber > 1000 && contractPriceNumber < 1000000) {
