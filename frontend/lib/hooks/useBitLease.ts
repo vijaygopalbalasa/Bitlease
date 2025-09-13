@@ -601,8 +601,8 @@ export function useBitLeaseLending() {
     }
   }
 
-  // Read USDC allowance for repayment
-  const { data: usdcAllowance } = useReadContract({
+  // Read USDC allowance for repayment with refetch capability
+  const { data: usdcAllowance, refetch: refetchUSDCAllowance } = useReadContract({
     address: CONTRACTS.USDC,
     abi: [
       {
@@ -835,17 +835,19 @@ export function useBitLeaseLending() {
     }
   }, [isSuccess, hash, refetchBBTCAllowance])
 
-  // Refetch bBTC allowance after successful approval
+  // Refetch allowances after successful approval (both bBTC and USDC)
   useEffect(() => {
     if (isApprovalSuccess && approvalHash) {
-      console.log('✅ bBTC approval successful, refetching allowance...')
+      console.log('✅ Token approval successful, refetching allowances...')
       // Wait a bit for the transaction to be fully processed
       const timer = setTimeout(() => {
         refetchBBTCAllowance()
+        refetchUSDCAllowance()
+        console.log('🔄 Refetched both bBTC and USDC allowances')
       }, 2000)
       return () => clearTimeout(timer)
     }
-  }, [isApprovalSuccess, approvalHash, refetchBBTCAllowance])
+  }, [isApprovalSuccess, approvalHash, refetchBBTCAllowance, refetchUSDCAllowance])
 
   return {
     userDebt: userDebt ? formatUnits(userDebt as bigint, 6) : '0',
