@@ -552,15 +552,21 @@ export default function LeasePage() {
                         </Button>
                       )}
 
-                      {/* Borrow Success Message */}
+                      {/* Transaction Success Message */}
                       {isBorrowSuccess && borrowHash && (
                         <div className="mt-6 p-6 bg-gradient-to-r from-green-500/20 to-teal-500/20 border border-green-500/30 rounded-2xl">
                           <div className="flex items-center justify-center mb-4">
                             <CheckCircleIcon className="h-8 w-8 text-green-400 mr-3" />
-                            <span className="text-green-300 font-bold text-xl">Successfully Borrowed USDC!</span>
+                            <span className="text-green-300 font-bold text-xl">
+                              {parseFloat(userDebt) <= 0 ? 'Successfully Repaid USDC Debt!' : 'Successfully Borrowed USDC!'}
+                            </span>
                           </div>
                           <div className="text-center">
-                            <p className="text-green-200 mb-4">Your USDC loan has been processed. Check your wallet balance.</p>
+                            <p className="text-green-200 mb-4">
+                              {parseFloat(userDebt) <= 0 
+                                ? 'Your debt has been fully repaid and collateral unlocked!' 
+                                : 'Your USDC loan has been processed. Check your wallet balance.'}
+                            </p>
                             <a 
                               href={`https://scan.test2.btcs.network/tx/${borrowHash}`}
                               target="_blank"
