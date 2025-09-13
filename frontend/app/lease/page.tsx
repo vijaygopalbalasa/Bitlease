@@ -40,7 +40,7 @@ export default function LeasePage() {
   const { price: selectedGPUPrice, isLoading: isPriceLoading } = useBitLeaseGPUPrice(selectedGPU);
   const { createLease, isCreatingLease: isTransactionPending, isConfirming: isLeaseConfirming, isSuccess: isLeaseSuccess, hash: leaseHash } = useBitLeaseLeases();
   const { bbtcBalance: stakingBalance } = useBitLeaseStaking();
-  const { borrow, repay, approveBBTC, bbtcAllowance, userBBTCBalance, poolUSDCBalance, btcPrice: oracleBtcPrice, btcPriceUSD, lastUpdated, isOracleStale, oracleSourceCount, isPending: isBorrowPending, isConfirming: isBorrowConfirming, isSuccess: isBorrowSuccess, error, hash: borrowHash, userDebt, userCollateral, isApprovalPending, isApprovalConfirming, isApprovalSuccess, approvalError, approvalHash } = useBitLeaseLending();
+  const { borrow, repay, approveBBTC, approveUSDC, bbtcAllowance, usdcAllowance, userBBTCBalance, poolUSDCBalance, btcPrice: oracleBtcPrice, btcPriceUSD, lastUpdated, isOracleStale, oracleSourceCount, isPending: isBorrowPending, isConfirming: isBorrowConfirming, isSuccess: isBorrowSuccess, error, hash: borrowHash, userDebt, userCollateral, isApprovalPending, isApprovalConfirming, isApprovalSuccess, approvalError, approvalHash } = useBitLeaseLending();
   
   // CRITICAL: Use contract oracle price for all calculations to match contract exactly
   const realBtcPrice = btcPriceUSD || displayBtcPrice; // Use contract oracle price first
@@ -695,9 +695,21 @@ export default function LeasePage() {
                           <Button
                             onClick={() => {
                               if (userDebt && parseFloat(userDebt) > 0 && userCollateral) {
-                                // Repay the full debt amount and withdraw all collateral
                                 const repayAmount = parseUnits(userDebt, 6);
                                 const withdrawCollateral = parseUnits(userCollateral, 8);
+                                
+                                // Check USDC allowance first
+                                if (!usdcAllowance || usdcAllowance < repayAmount) {
+                                  console.log('🔄 USDC approval required for repayment:', {
+                                    required: repayAmount.toString(),
+                                    current: usdcAllowance?.toString() || '0'
+                                  });
+                                  // Approve USDC for repayment
+                                  approveUSDC(repayAmount);
+                                  return;
+                                }
+                                
+                                // Proceed with repay if allowance is sufficient
                                 repay(repayAmount, withdrawCollateral);
                               }
                             }}
@@ -705,7 +717,9 @@ export default function LeasePage() {
                             className="group relative w-full bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white py-6 rounded-2xl text-xl font-bold shadow-2xl shadow-green-500/30 transform hover:scale-105 transition-all duration-300 overflow-hidden disabled:opacity-50"
                           >
                             <span className="relative z-10 flex items-center justify-center">
-                              {isBorrowConfirming ? 'Repaying...' : `Repay Full Debt (${userDebt} USDC)`}
+                              {isBorrowConfirming ? 'Repaying...' : 
+                               (!usdcAllowance || usdcAllowance < parseUnits(userDebt, 6)) ? 'Approve USDC for Repayment' : 
+                               `Repay Full Debt (${userDebt} USDC)`}
                               {!isBorrowConfirming && <ArrowRightIcon className="h-6 w-6 ml-3 transform group-hover:translate-x-2 transition-transform duration-300" />}
                             </span>
                             <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 to-green-500 translate-x-full group-hover:translate-x-0 transition-transform duration-700"></div>
@@ -716,9 +730,21 @@ export default function LeasePage() {
                             <Button
                               onClick={() => {
                                 if (usdcBalance && userCollateral) {
-                                  // Repay whatever USDC the user has available
                                   const availableUSDC = usdcBalance.value;
                                   const repayAmount = availableUSDC;
+                                  
+                                  // Check USDC allowance first
+                                  if (!usdcAllowance || usdcAllowance < repayAmount) {
+                                    console.log('🔄 USDC approval required for partial repayment:', {
+                                      required: repayAmount.toString(),
+                                      current: usdcAllowance?.toString() || '0'
+                                    });
+                                    // Approve USDC for repayment
+                                    approveUSDC(repayAmount);
+                                    return;
+                                  }
+                                  
+                                  // Proceed with partial repay if allowance is sufficient
                                   // Don't withdraw collateral on partial repay for safety
                                   repay(repayAmount, 0n);
                                 }
@@ -727,7 +753,9 @@ export default function LeasePage() {
                               className="group relative w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white py-6 rounded-2xl text-xl font-bold shadow-2xl shadow-yellow-500/30 transform hover:scale-105 transition-all duration-300 overflow-hidden"
                             >
                               <span className="relative z-10 flex items-center justify-center">
-                                {isBorrowConfirming ? 'Repaying...' : `Partial Repay (${(Number(usdcBalance.value) / 1e6).toFixed(2)} USDC)`}
+                                {isBorrowConfirming ? 'Repaying...' : 
+                                 (!usdcAllowance || usdcAllowance < usdcBalance.value) ? 'Approve USDC for Partial Repay' : 
+                                 `Partial Repay (${(Number(usdcBalance.value) / 1e6).toFixed(2)} USDC)`}
                                 {!isBorrowConfirming && <ArrowRightIcon className="h-6 w-6 ml-3 transform group-hover:translate-x-2 transition-transform duration-300" />}
                               </span>
                               <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-orange-500 translate-x-full group-hover:translate-x-0 transition-transform duration-700"></div>

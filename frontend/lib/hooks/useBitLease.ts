@@ -601,6 +601,59 @@ export function useBitLeaseLending() {
     }
   }
 
+  // Read USDC allowance for repayment
+  const { data: usdcAllowance } = useReadContract({
+    address: CONTRACTS.USDC,
+    abi: [
+      {
+        inputs: [
+          { name: "owner", type: "address" },
+          { name: "spender", type: "address" }
+        ],
+        name: "allowance",
+        outputs: [{ name: "", type: "uint256" }],
+        stateMutability: "view",
+        type: "function"
+      }
+    ],
+    functionName: 'allowance',
+    args: [address, CONTRACTS.LendingPool],
+    query: { enabled: !!address }
+  })
+
+  // Approve USDC for LendingPool (needed for repayment)
+  const approveUSDC = (amount: bigint) => {
+    console.log('🔄 Approving USDC for LendingPool:', {
+      USDCContract: CONTRACTS.USDC,
+      spender: CONTRACTS.LendingPool,
+      amount: amount.toString(),
+      address: address
+    })
+    
+    try {
+      (writeApprovalContract as any)({
+        address: CONTRACTS.USDC,
+        abi: [
+          {
+            inputs: [
+              { name: "spender", type: "address" },
+              { name: "amount", type: "uint256" }
+            ],
+            name: "approve",
+            outputs: [{ name: "", type: "bool" }],
+            stateMutability: "nonpayable",
+            type: "function"
+          }
+        ],
+        functionName: 'approve',
+        args: [CONTRACTS.LendingPool, amount]
+      })
+    } catch (error) {
+      console.error('❌ Failed to call approveUSDC:', error)
+      throw error
+    }
+  }
+
   // Borrow function
   const borrow = async (collateralAmount: bigint, borrowAmount: bigint) => {
     // Check professional oracle status
@@ -799,6 +852,7 @@ export function useBitLeaseLending() {
     userCollateral: userCollateral ? formatUnits(userCollateral as bigint, 8) : '0',
     healthFactor: healthFactor ? formatUnits(healthFactor as bigint, 18) : '0',
     bbtcAllowance: bbtcAllowance || 0n,
+    usdcAllowance: usdcAllowance || 0n, // USDC allowance for repayment
     userBBTCBalance: userBBTCBalance || 0n,
     poolUSDCBalance: poolUSDCBalance || 0n,
     btcPrice: btcPrice || 0n,
@@ -814,6 +868,7 @@ export function useBitLeaseLending() {
     borrow,
     repay,
     approveBBTC,
+    approveUSDC, // USDC approval for repayment
     isPending,
     isConfirming,
     isSuccess,
