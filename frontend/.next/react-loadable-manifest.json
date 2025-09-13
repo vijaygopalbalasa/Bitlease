@@ -507,7 +507,7 @@
   "node_modules/@wagmi/connectors/dist/esm/coinbaseWallet.js -> cbw-sdk": {
     "id": 9381,
     "files": [
-      "static/chunks/9381.cb2e13187c1e74d4.js",
+      "static/chunks/9381.208549959c61d353.js",
       "static/chunks/2753.8b31595dee6605ed.js"
     ]
   },

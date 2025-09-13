@@ -5,11 +5,37 @@ import { CpuChipIcon, CurrencyDollarIcon, ClockIcon, ChartBarIcon, PlusIcon, Bol
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import Link from 'next/link';
+import { useBitLeaseStaking, useBitLeaseLending } from '../../lib/hooks/useBitLease';
+import { useAccount, useReadContract } from 'wagmi';
+import { formatUnits } from 'viem';
+import { CONTRACTS } from '../../lib/contracts';
 
 export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState('overview');
   const [isVisible, setIsVisible] = useState(false);
   const [animatedValue, setAnimatedValue] = useState(0);
+  
+  // Get real blockchain data
+  const { address } = useAccount();
+  const { bbtcBalance, exchangeRate } = useBitLeaseStaking();
+  const { userCollateral, userDebt, poolUSDCBalance } = useBitLeaseLending();
+  
+  // Get user's USDC balance separately (not included in lending hook)
+  const { data: userUSDCBalance } = useReadContract({
+    address: CONTRACTS.USDC,
+    abi: [
+      {
+        inputs: [{ name: "account", type: "address" }],
+        name: "balanceOf",
+        outputs: [{ name: "", type: "uint256" }],
+        stateMutability: "view",
+        type: "function"
+      }
+    ],
+    functionName: 'balanceOf',
+    args: address ? [address] : undefined,
+    query: { enabled: !!address }
+  });
 
   useEffect(() => {
     setIsVisible(true);
@@ -19,13 +45,14 @@ export default function DashboardPage() {
     return () => clearInterval(interval);
   }, []);
 
-  // Mock data - in real app this would come from your contracts
+  // Real data from blockchain contracts
   const userStats = {
-    totalBTCStaked: 0.25,
-    bBTCBalance: 0.254,
-    activeLeases: 2,
-    totalSpent: 125.50,
-    earned: 15.75
+    totalBTCStaked: userCollateral ? parseFloat(userCollateral) : 0,
+    bBTCBalance: bbtcBalance ? parseFloat(bbtcBalance) : 0,
+    activeLeases: 2, // Keep mock for demo
+    totalSpent: userDebt ? parseFloat(userDebt) : 0,
+    usdcBalance: userUSDCBalance ? parseFloat(formatUnits(userUSDCBalance, 6)) : 0,
+    earned: 15.75 // Keep mock APY calculation for demo
   };
 
   const activeLeases = [
@@ -64,9 +91,9 @@ export default function DashboardPage() {
 
   const statsCards = [
     {
-      label: "BTC Staked",
-      value: userStats.totalBTCStaked,
-      subtitle: "+5.5% APY",
+      label: "BTC Collateral",
+      value: userStats.totalBTCStaked.toFixed(8),
+      subtitle: "Locked as collateral",
       icon: "₿",
       color: "from-orange-500 to-red-500",
       bgColor: "bg-orange-500/20",
@@ -74,27 +101,27 @@ export default function DashboardPage() {
     },
     {
       label: "bBTC Balance", 
-      value: userStats.bBTCBalance,
-      subtitle: "Liquid receipt",
+      value: userStats.bBTCBalance.toFixed(8),
+      subtitle: "Available liquid tokens",
       icon: CurrencyDollarIcon,
       color: "from-blue-500 to-purple-500",
       bgColor: "bg-blue-500/20",
       textColor: "text-blue-400"
     },
     {
-      label: "Active Leases",
-      value: userStats.activeLeases,
-      subtitle: "GPU instances",
-      icon: CpuChipIcon,
-      color: "from-purple-500 to-pink-500", 
-      bgColor: "bg-purple-500/20",
-      textColor: "text-purple-400"
+      label: "USDC Debt",
+      value: `$${userStats.totalSpent.toFixed(2)}`,
+      subtitle: "Current borrowed amount",
+      icon: ChartBarIcon,
+      color: "from-red-500 to-pink-500", 
+      bgColor: "bg-red-500/20",
+      textColor: "text-red-400"
     },
     {
-      label: "Total Earned",
-      value: `$${userStats.earned}`,
-      subtitle: "CORE rewards",
-      icon: ChartBarIcon,
+      label: "USDC Balance",
+      value: `$${userStats.usdcBalance.toFixed(2)}`,
+      subtitle: "Available for repayment",
+      icon: CurrencyDollarIcon,
       color: "from-green-500 to-teal-500",
       bgColor: "bg-green-500/20", 
       textColor: "text-green-400"
@@ -165,7 +192,20 @@ export default function DashboardPage() {
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">
         
         {/* New User Onboarding */}
-        {userStats.totalBTCStaked === 0 && (
+        {!address ? (
+          <div className={`max-w-4xl mx-auto mb-12 transition-all duration-1000 ease-out ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`} style={{ transitionDelay: '300ms' }}>
+            <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl border border-slate-700/50 rounded-3xl p-8 relative overflow-hidden">
+              <div className="relative z-10 text-center">
+                <h2 className="text-3xl font-bold text-white mb-4 flex items-center justify-center gap-3">
+                  🔗 Connect Your Wallet
+                </h2>
+                <p className="text-xl text-gray-300 mb-8 max-w-3xl mx-auto font-light">
+                  Connect your wallet to view your real BitLease portfolio data and start Bitcoin-backed GPU leasing.
+                </p>
+              </div>
+            </div>
+          </div>
+        ) : userStats.totalBTCStaked === 0 && userStats.bBTCBalance === 0 && (
           <div className={`max-w-4xl mx-auto mb-12 transition-all duration-1000 ease-out ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`} style={{ transitionDelay: '300ms' }}>
             <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl border border-slate-700/50 rounded-3xl p-8 relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-r from-orange-500/20 via-purple-500/20 to-blue-500/20 rounded-3xl opacity-50 animate-pulse"></div>
@@ -298,13 +338,13 @@ export default function DashboardPage() {
                           <span className="text-white font-bold text-lg">₿</span>
                         </div>
                         <div>
-                          <p className="text-gray-400 text-sm">Bitcoin Staked</p>
-                          <p className="text-white font-bold text-xl">0.25 BTC</p>
+                          <p className="text-gray-400 text-sm">BTC Collateral</p>
+                          <p className="text-white font-bold text-xl">{userStats.totalBTCStaked.toFixed(8)} BTC</p>
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="text-green-400 font-semibold">+5.5% APY</p>
-                        <p className="text-gray-300 text-sm">≈ $15,000</p>
+                        <p className="text-green-400 font-semibold">Locked</p>
+                        <p className="text-gray-300 text-sm">In lending pool</p>
                       </div>
                     </div>
                     
@@ -315,12 +355,12 @@ export default function DashboardPage() {
                         </div>
                         <div>
                           <p className="text-gray-400 text-sm">Available bBTC</p>
-                          <p className="text-white font-bold text-xl">0.254 bBTC</p>
+                          <p className="text-white font-bold text-xl">{userStats.bBTCBalance.toFixed(8)} bBTC</p>
                         </div>
                       </div>
                       <div className="text-right">
                         <p className="text-blue-400 font-semibold">Liquid</p>
-                        <p className="text-gray-300 text-sm">Ready for collateral</p>
+                        <p className="text-gray-300 text-sm">Ready for staking</p>
                       </div>
                     </div>
                   </div>
