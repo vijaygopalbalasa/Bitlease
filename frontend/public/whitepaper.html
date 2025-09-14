@@ -371,8 +371,78 @@
             </section>
 
             <section id="core-flow" class="section">
-                <h2>🔄 Core Flow Mechanics</h2>
+                <h2>🔄 Two-Mode Borrowing System</h2>
                 
+                <div class="highlight">
+                    <h3>Revolutionary Anti-Gaming Design</h3>
+                    <p>BitLease implements two distinct borrowing modes to prevent gaming while maintaining excellent UX for legitimate users. This sophisticated system ensures borrowed funds are used for real-world assets, not speculation.</p>
+                </div>
+
+                <h3>Mode 1: Default Lease Mode (Anti-Gaming)</h3>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Feature</th>
+                                <th>Mechanism</th>
+                                <th>Anti-Gaming Protection</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Atomic Lease Flow</td>
+                                <td>createLease(provider, units)</td>
+                                <td>USDC never touches borrower wallet</td>
+                            </tr>
+                            <tr>
+                                <td>LeaseCredits (LC)</td>
+                                <td>Soulbound ERC-20 backed 1:1 by USDC</td>
+                                <td>Non-transferable except to providers</td>
+                            </tr>
+                            <tr>
+                                <td>Escrow System</td>
+                                <td>LeaseEscrow locks funds until service delivery</td>
+                                <td>72h dispute window with automated outcomes</td>
+                            </tr>
+                            <tr>
+                                <td>Provider Verification</td>
+                                <td>EIP-712 signed proofs for service delivery</td>
+                                <td>Bond staking + reputation system</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>Mode 2: Open Borrow Mode (Higher Cost)</h3>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Feature</th>
+                                <th>Mechanism</th>
+                                <th>Cost/Restriction</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Direct USDC</td>
+                                <td>borrowOpen(amount)</td>
+                                <td>Higher APR + origination fee</td>
+                            </tr>
+                            <tr>
+                                <td>Gaming Prevention</td>
+                                <td>48h cooldown for LP deposits</td>
+                                <td>No immediate reward farming</td>
+                            </tr>
+                            <tr>
+                                <td>Higher Risk</td>
+                                <td>Premium pricing model</td>
+                                <td>15% APR vs 8% in Lease Mode</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
                 <h3>Actor Map</h3>
                 <div class="table-wrapper">
                     <table>
@@ -409,6 +479,11 @@
                                 <td>Supply liquidity</td>
                                 <td>Lending pool</td>
                             </tr>
+                            <tr>
+                                <td>Provider Registry</td>
+                                <td>Bonded service providers</td>
+                                <td>EIP-712 verification</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -437,22 +512,86 @@ function mint(bytes32 btcTxHash, uint256 amount) external {
 }
                 </div>
 
-                <h4>Step 3: Asset Leasing</h4>
-                <p>Alice visits <strong>bitlease.xyz</strong> and selects "24h A100 GPU - $60". The platform locks her 0.1 bBTC as collateral and provides $60 USDC at 50% LTV ratio.</p>
+                <h4>Step 3A: Lease Mode Flow (Default)</h4>
+                <p>Alice visits <strong>bitlease.xyz</strong> and selects "24h A100 GPU - $60" in Lease Mode:</p>
                 <div class="code-block">
-// LendingPool.sol
-function borrow(uint256 usdcAmount, address asset) external {
-    uint256 collateralNeeded = (usdcAmount * 1e18) / (btcPrice * LTV);
+// LeaseManager.sol - Atomic lease creation
+function createLease(address provider, uint256 units) external {
+    uint256 collateralNeeded = calculateCollateral(units);
+    
+    // Lock bBTC collateral
     IERC20(bBTC).transferFrom(msg.sender, address(this), collateralNeeded);
-    IERC20(USDC).transfer(msg.sender, usdcAmount);
+    
+    // Create lease in escrow (USDC never touches borrower)
+    bytes32 leaseId = _createLeaseEscrow(provider, units, msg.sender);
+    
+    // Mint LeaseCredits 1:1 with escrow USDC
+    LeaseCredits(LC).mint(msg.sender, usdcAmount);
+    
+    // Set lease status to Provisioning
+    leases[leaseId].status = LeaseStatus.Provisioning;
+    
+    emit LeaseCreated(leaseId, msg.sender, provider, units);
 }
                 </div>
 
-                <h4>Step 4: Provider Payment</h4>
-                <p>BitLease backend converts USDC to USD and pays the GPU provider (Render Network) via traditional payment rails. Alice receives SSH access credentials and begins using the GPU.</p>
+                <h4>Step 3B: Provider Verification & EIP-712 Proof</h4>
+                <p>Provider submits cryptographic proof of service delivery using EIP-712 standard:</p>
+                <div class="code-block">
+// EIP-712 Proof Structure
+struct ProviderProof {
+    bytes32 leaseId;           // Unique lease identifier
+    address providerAddress;   // Provider's wallet address
+    bytes32 sessionId;         // Unique session identifier
+    uint256 unitsAllocated;    // GPU hours delivered
+    uint256 startTimestamp;    // Service start time
+    uint256 endTimestamp;      // Service end time
+    bytes32 resourceSpecHash;  // Hash of GPU specs (type, memory, vCPU)
+    bytes32 metadataHash;      // Hash of deployment/config logs
+}
 
-                <h4>Step 5: Loan Repayment</h4>
-                <p>After using the GPU, Alice repays $60.60 USDC (including 1% origination fee) to unlock her bBTC collateral. Her bBTC has grown to 0.10042 due to CORE staking rewards earned during the lease period.</p>
+// Provider calls finalizeLease with signed proof
+function finalizeLease(bytes32 leaseId, ProviderProof memory proof, bytes memory signature) external {
+    require(verifyProviderSignature(proof, signature), "Invalid proof");
+    require(block.timestamp <= proof.endTimestamp + 72 hours, "Dispute window expired");
+    
+    // Release escrow funds to provider minus fees
+    LeaseEscrow(escrow).releaseToProvider(leaseId);
+    
+    // Update provider reputation
+    ProviderRegistry(registry).updateReputation(proof.providerAddress, true);
+    
+    leases[leaseId].status = LeaseStatus.Completed;
+}
+                </div>
+
+                <h4>Step 3C: Open Borrow Mode (Alternative)</h4>
+                <p>For users needing direct USDC access (higher cost):</p>
+                <div class="code-block">
+// LendingPool.sol - Open borrowing with restrictions
+function borrowOpen(uint256 usdcAmount) external {
+    require(!isInCooldown(msg.sender), "48h cooldown active");
+    
+    uint256 collateralNeeded = (usdcAmount * 1e18) / (btcPrice * OPEN_LTV); // Lower LTV
+    IERC20(bBTC).transferFrom(msg.sender, address(this), collateralNeeded);
+    
+    // Higher APR + origination fee for open borrowing
+    uint256 fee = usdcAmount * OPEN_ORIGINATION_FEE / 10000; // 2% vs 1%
+    uint256 interest = usdcAmount * OPEN_APR / 10000; // 15% vs 8%
+    
+    IERC20(USDC).transfer(msg.sender, usdcAmount);
+    
+    // Set cooldown to prevent LP gaming
+    cooldowns[msg.sender] = block.timestamp + 48 hours;
+}
+                </div>
+
+                <h4>Step 4: Service Delivery & Dispute Resolution</h4>
+                <p><strong>Lease Mode:</strong> Provider delivers service and submits proof within 72h dispute window. If no valid proof submitted, borrower gets automatic refund and provider bond is slashed.</p>
+                <p><strong>Open Mode:</strong> Direct USDC transfer with higher interest rates to compensate for increased risk.</p>
+
+                <h4>Step 5: Loan Repayment & Rewards</h4>
+                <p>Alice repays loan plus fees to unlock her bBTC collateral. Her bBTC has grown due to CORE staking rewards earned during the lease period (5.5% APY continues throughout).</p>
 
                 <h3>Financial Flow Summary</h3>
                 <div class="stats-grid">
@@ -545,9 +684,12 @@ function borrow(uint256 usdcAmount, address asset) external {
                 <div class="code-block">
 contracts/
 ├── bBTC.sol              # ERC-4626 staked BTC vault
-├── LendingPool.sol       # USDC lending (Aave fork)
-├── LeaseManager.sol      # Asset lease creation
-├── UniversalOracle.sol   # Multi-asset pricing
+├── LendingPool.sol       # Two-mode USDC lending system
+├── LeaseManager.sol      # Atomic lease creation & EIP-712 verification
+├── LeaseCredits.sol      # Soulbound ERC-20 backed by escrow
+├── LeaseEscrow.sol       # 72h dispute window with automated payouts
+├── ProviderRegistry.sol  # Bonded providers with reputation system
+├── UniversalOracle.sol   # Multi-asset pricing with TWAP
 └── LiquidationEngine.sol # Auto-liquidation at 75% LTV
                 </div>
 
@@ -990,7 +1132,8 @@ Example (current numbers):
                 <p><strong>BitLease</strong> - Built with ❤️ on CoreDAO</p>
                 <p><em>The first protocol to turn idle Bitcoin into productive capital for real-world asset leasing.</em></p>
                 <p>
-                    <a href="https://github.com/your-username/bitlease" target="_blank">GitHub</a> • 
+                    <a href="https://github.com/vijaygopalbalasa/Bitlease" target="_blank">GitHub</a> • 
+                    <a href="https://x.com/bitleasehq" target="_blank">Twitter</a> • 
                     <a href="https://coredao.org" target="_blank">CoreDAO</a> • 
                     <a href="mailto:support@bitlease.xyz">Contact</a>
                 </p>
