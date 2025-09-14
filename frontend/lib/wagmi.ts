@@ -45,7 +45,7 @@ export const networks = [coreTestnet, coreMainnet];
 export const wagmiAdapter = new WagmiAdapter({
   projectId,
   networks,
-  ssr: true, // Enable server-side rendering support
+  ssr: false, // Disable SSR to fix balance reading issues
 })
 
 export const config = wagmiAdapter.wagmiConfig;

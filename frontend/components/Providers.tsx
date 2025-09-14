@@ -22,14 +22,16 @@ export function Providers({ children }: { children: ReactNode }) {
     setMounted(true);
   }, []);
   
+  // Don't render anything until mounted to prevent hydration mismatches
+  if (!mounted) {
+    return null;
+  }
+  
   return (
     <WagmiProvider config={config} reconnectOnMount={true}>
       <QueryClientProvider client={queryClient}>
         <NotificationProvider>
-          {/* Always render children to prevent layout shifts */}
-          <div style={{ opacity: mounted ? 1 : 0, transition: 'opacity 0.3s ease' }}>
-            {children}
-          </div>
+          {children}
         </NotificationProvider>
       </QueryClientProvider>
     </WagmiProvider>
