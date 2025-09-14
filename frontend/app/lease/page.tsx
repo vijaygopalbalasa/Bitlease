@@ -22,6 +22,7 @@ export default function LeasePage() {
   const [borrowAmount, setBorrowAmount] = useState('');
   const [isVisible, setIsVisible] = useState(false);
   const [activeGPU, setActiveGPU] = useState(0);
+  const [lastOperation, setLastOperation] = useState<'borrow' | 'repay' | null>(null);
 
   const { address, isConnected } = useAccount();
   const { data: bbtcBalance } = useBalance({
@@ -57,6 +58,13 @@ export default function LeasePage() {
       return () => clearTimeout(timer);
     }
   }, [isBorrowSuccess, borrowHash, refetchUSDCBalance]);
+
+  // Reset operation state when transaction starts
+  useEffect(() => {
+    if (isBorrowPending || isBorrowConfirming) {
+      // Don't reset during transaction - we need it for the success message
+    }
+  }, [isBorrowPending, isBorrowConfirming]);
 
   // Handle successful bBTC approval
   useEffect(() => {
@@ -534,6 +542,7 @@ export default function LeasePage() {
                                 borrowUsdcAmount: borrowUsdcAmount.toString(),
                                 maxUsdcValue
                               });
+                              setLastOperation('borrow');
                               borrow(collateralAmount, borrowUsdcAmount);
                             } else {
                               console.log('Borrow conditions not met:', {
@@ -566,13 +575,13 @@ export default function LeasePage() {
                           <div className="flex items-center justify-center mb-4">
                             <CheckCircleIcon className="h-8 w-8 text-green-400 mr-3" />
                             <span className="text-green-300 font-bold text-xl">
-                              {parseFloat(userDebt) <= 0 ? 'Successfully Repaid USDC Debt!' : 'Successfully Borrowed USDC!'}
+                              {lastOperation === 'repay' ? 'Successfully Repaid USDC Debt!' : 'Successfully Borrowed USDC!'}
                             </span>
                           </div>
                           <div className="text-center">
                             <p className="text-green-200 mb-4">
-                              {parseFloat(userDebt) <= 0 
-                                ? 'Your debt has been fully repaid and collateral unlocked!' 
+                              {lastOperation === 'repay'
+                                ? 'Your debt has been repaid and transaction confirmed!' 
                                 : 'Your USDC loan has been processed. Check your wallet balance.'}
                             </p>
                             <a 
@@ -724,6 +733,7 @@ export default function LeasePage() {
                                 }
                                 
                                 // Proceed with repay if allowance is sufficient
+                                setLastOperation('repay');
                                 repay(repayAmount, withdrawCollateral);
                               }
                             }}
@@ -760,6 +770,7 @@ export default function LeasePage() {
                                   
                                   // Proceed with partial repay if allowance is sufficient
                                   // Don't withdraw collateral on partial repay for safety
+                                  setLastOperation('repay');
                                   repay(repayAmount, 0n);
                                 }
                               }}

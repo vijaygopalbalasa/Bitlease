@@ -962,8 +962,34 @@ export function useBitLeaseGPUPrice(gpuType: string) {
     query: { enabled: !!gpuType }
   })
   
+  // Safe formatUnits for GPU price
+  const safePrice = (price: any) => {
+    try {
+      if (!price) return '0';
+      
+      let bigintValue: bigint;
+      if (typeof price === 'bigint') {
+        bigintValue = price;
+      } else if (typeof price === 'string' || typeof price === 'number') {
+        bigintValue = BigInt(price);
+      } else {
+        return '0';
+      }
+      
+      if (bigintValue < 0n) {
+        console.warn('Negative GPU price detected, using 0:', bigintValue.toString());
+        return '0';
+      }
+      
+      return formatUnits(bigintValue, 6);
+    } catch (error) {
+      console.error('GPU price formatUnits error:', error, 'price:', price);
+      return '0';
+    }
+  };
+
   return {
-    price: price ? formatUnits(price as bigint, 6) : '0',
+    price: safePrice(price),
     isLoading: !price && !!gpuType
   }
 }

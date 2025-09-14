@@ -51,7 +51,18 @@ export default function DashboardPage() {
     bBTCBalance: bbtcBalance ? parseFloat(bbtcBalance) : 0,
     activeLeases: 2, // Keep mock for demo
     totalSpent: userDebt ? parseFloat(userDebt) : 0,
-    usdcBalance: userUSDCBalance ? parseFloat(formatUnits(userUSDCBalance, 6)) : 0,
+    usdcBalance: userUSDCBalance ? (() => {
+      try {
+        if (userUSDCBalance < 0n) {
+          console.warn('Negative USDC balance detected, using 0:', userUSDCBalance.toString());
+          return 0;
+        }
+        return parseFloat(formatUnits(userUSDCBalance, 6));
+      } catch (error) {
+        console.error('USDC balance formatUnits error:', error, 'balance:', userUSDCBalance);
+        return 0;
+      }
+    })() : 0,
     earned: 15.75 // Keep mock APY calculation for demo
   };
 
