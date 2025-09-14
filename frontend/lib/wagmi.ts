@@ -45,6 +45,7 @@ export const networks = [coreTestnet, coreMainnet];
 export const wagmiAdapter = new WagmiAdapter({
   projectId,
   networks,
+  ssr: true, // Enable server-side rendering support
 })
 
 export const config = wagmiAdapter.wagmiConfig;
@@ -70,7 +71,15 @@ export const getAppKit = () => {
       } as any,
       features: {
         analytics: false,
-      }
+        email: false,
+        socials: [],
+        onramp: false,
+        swaps: false,
+      },
+      enableWalletConnect: true,
+      enableInjected: true,
+      enableCoinbase: true,
+      allWallets: 'SHOW'
     });
   }
   return appKitInstance;
